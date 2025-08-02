@@ -1,6 +1,6 @@
-# Base image from the specified distro (e.g., debian:12 or ubuntu:24.04)
+# Stage 1: Builder (compile and package)
 ARG DISTRO
-FROM --platform=linux/${ARCH} ${DISTRO}  # ARCH will be set via build-arg, but platform is handled by buildx
+FROM ${DISTRO} AS builder
 
 # Valkey release tag to build (passed from GitHub Actions)
 ARG RELEASE_TAG
@@ -17,7 +17,9 @@ RUN apt update && \
     apt install -y build-essential curl git autoconf pkg-config libssl-dev libsystemd-dev zlib1g-dev debhelper && \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         apt install -y libatomic1; \
-    fi
+    fi && \
+    # Clean up to reduce image size
+    rm -rf /var/lib/apt/lists/*
 
 # Download and extract Valkey source code from GitHub
 RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}.tar.gz -o valkey.tar.gz && \
@@ -48,5 +50,6 @@ COPY debian/ valkey-${RELEASE_TAG}/debian/
 RUN cd valkey-${RELEASE_TAG} && \
     DEB_BUILD_OPTIONS="parallel=$(nproc)" dpkg-buildpackage -b -us -uc --host-arch ${ARCH}
 
-# The build outputs .deb files in the parent directory
-CMD ["echo", "Build complete. Generated packages: valkey-server*.deb, valkey-sentinel*.deb, valkey-tools*.deb"]
+# Stage 2: Output (extract only .deb files for clean export)
+FROM scratch AS output
+COPY --from=builder /*.deb /
