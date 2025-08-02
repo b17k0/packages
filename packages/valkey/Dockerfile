@@ -1,5 +1,5 @@
 # Stage 1: Builder (compile and package)
-ARG DISTRO
+ARG DISTRO=debian:12
 FROM ${DISTRO} AS builder
 
 # Valkey release tag to build (passed from GitHub Actions)

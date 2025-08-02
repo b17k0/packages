@@ -44,13 +44,13 @@ jobs:
         run: |
           if [ "${{ env.LATEST_TAG }}" != "${{ env.LAST_RELEASE }}" ]; then
             echo "new_release=true" >> $GITHUB_OUTPUT
-            echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
-            MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
-            echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
             echo "${{ env.LATEST_TAG }}" > last_release.txt
           else
             echo "new_release=false" >> $GITHUB_OUTPUT
           fi
+          echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
+          MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
+          echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
 
       - name: Commit last release update
         if: steps.check.outputs.new_release == 'true'
