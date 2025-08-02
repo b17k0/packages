@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    adduser --system --group --no-create-home valkey
+    mkdir -p /var/lib/valkey /var/log/valkey
+    chown valkey:valkey /var/lib/valkey /var/log/valkey
+    chmod 755 /var/lib/valkey /var/log/valkey
+fi
+
+# systemctl enable valkey-server.service || true
+# systemctl start valkey-server.service || true

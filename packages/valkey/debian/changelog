@@ -1,0 +1,6 @@
+valkey (placeholder-1) unstable; urgency=medium
+
+  * Initial release of Valkey (forked from Redis).
+  * Support for TLS, systemd integration, and basic tools.
+
+ -- Your Name <your@email.com>  Sat, 02 Aug 2025 14:55:00 +0000

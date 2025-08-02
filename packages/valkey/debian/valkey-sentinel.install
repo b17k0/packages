@@ -1,0 +1,3 @@
+usr/bin/valkey-sentinel
+etc/valkey/sentinel.conf etc/valkey/
+lib/systemd/system/valkey-sentinel.service lib/systemd/system/

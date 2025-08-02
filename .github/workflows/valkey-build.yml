@@ -1,0 +1,177 @@
+name: Check and Build Valkey Releases
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+env:
+  DISTROS: |
+    debian:12
+    ubuntu:24.04
+  ARCHS: |
+    amd64
+    arm64
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    outputs:
+      new_release: ${{ steps.check.outputs.new_release }}
+      release_tag: ${{ steps.check.outputs.release_tag }}
+      major_version: ${{ steps.check.outputs.major_version }}
+      distros_list: ${{ steps.check.outputs.distros_list }}
+      archs_list: ${{ steps.check.outputs.archs_list }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get last processed release
+        id: last
+        run: |
+          if [ -f last_release.txt ]; then
+            LAST_RELEASE=$(cat last_release.txt)
+          else
+            LAST_RELEASE="none"
+          fi
+          echo "LAST_RELEASE=$LAST_RELEASE" >> $GITHUB_ENV
+
+      - name: Fetch latest Valkey release
+        id: fetch
+        run: |
+          LATEST_TAG=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/valkey-io/valkey/releases/latest | jq -r '.tag_name')
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Check if new release and parse major version
+        id: check
+        run: |
+          if [ "${{ env.LATEST_TAG }}" != "${{ env.LAST_RELEASE }}" ]; then
+            echo "new_release=true" >> $GITHUB_OUTPUT
+            echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
+            MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
+            echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
+            echo "distros_list=${{ env.DISTROS }}" >> $GITHUB_OUTPUT
+            echo "archs_list=${{ env.ARCHS }}" >> $GITHUB_OUTPUT
+            echo "${{ env.LATEST_TAG }}" > last_release.txt
+          else
+            echo "new_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit last release update
+        if: steps.check.outputs.new_release == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "Update last processed release to ${{ env.LATEST_TAG }}"
+          add: last_release.txt
+
+  generate-matrix:
+    needs: check-release
+    if: needs.check-release.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Generate dynamic matrix from env.DISTROS and env.ARCHS
+        id: set-matrix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const distros = "${{ env.DISTROS }}".trim().split(/\s+/);
+            const archs = "${{ env.ARCHS }}".trim().split(/\s+/);
+            const matrix = { distro: distros, arch: archs };
+            core.setOutput('matrix', JSON.stringify(matrix));
+
+  build-packages:
+    needs: [check-release, generate-matrix]
+    if: needs.check-release.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update changelog with release version
+        run: |
+          cd packages/valkey
+          if [ ! -f debian/changelog ]; then echo "Changelog not found!"; exit 1; fi
+          sed -i "1s/.*/valkey (${{ needs.check-release.outputs.release_tag }}-1) unstable; urgency=medium/" debian/changelog
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build deb packages in Docker
+        run: |
+          docker buildx build --platform linux/${{ matrix.arch }} \
+            --build-arg DISTRO=${{ matrix.distro }} \
+            --build-arg RELEASE_TAG=${{ needs.check-release.outputs.release_tag }} \
+            --build-arg MAJOR=${{ needs.check-release.outputs.major_version }} \
+            --build-arg ARCH=${{ matrix.arch }} \
+            --output type=local,dest=./build/${{ matrix.distro }}-${{ matrix.arch }} \
+            -f packages/valkey/Dockerfile .
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.distro }}-${{ matrix.arch }}
+          path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
+
+  create-repo:
+    needs: [check-release, build-packages]
+    if: needs.check-release.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up reprepro
+        run: |
+          sudo apt update
+          sudo apt install -y reprepro gh
+
+      - name: Download packages and include in repo (dynamic for all distros and archs)
+        env:
+          DISTROS: ${{ needs.check-release.outputs.distros_list }}
+          ARCHS: ${{ needs.check-release.outputs.archs_list }}
+        run: |
+          CODENAME="valkey${{ needs.check-release.outputs.major_version }}"
+          sed -i "s/Codename: stable/Codename: $CODENAME/" reprepro/conf/distributions
+          
+          # Dynamically set Architectures in distributions file
+          ARCH_LIST=$(echo "$ARCHS" | tr '\n' ' ')
+          sed -i "s/Architectures: amd64/Architectures: $ARCH_LIST/" reprepro/conf/distributions
+          
+          for distro in $(echo "$DISTROS" | tr '\n' ' '); do
+            for arch in $(echo "$ARCHS" | tr '\n' ' '); do
+              # Download artifact for this distro-arch combo
+              echo "Downloading packages for $distro on $arch"
+              artifact_name="packages-$distro-$arch"
+              pool_dir="repo/pool/${distro//:/}/$arch"  # e.g., repo/pool/debian12/arm64
+              
+              mkdir -p "$pool_dir"
+              gh artifact download --name "$artifact_name" --dir "$pool_dir" || echo "No packages for $distro-$arch, skipping"
+              
+              # Include debs in reprepro if files exist
+              if ls "$pool_dir"/*.deb > /dev/null 2>&1; then
+                reprepro -b repo includedeb $CODENAME "$pool_dir"/*.deb
+              fi
+            done
+          done
+          
+          # Generate Release files for the codename (will create binary-* for each arch)
+          mkdir -p repo/dists/$CODENAME/main/binary-amd64  # Example; reprepro will handle others
+          reprepro -b repo export $CODENAME
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }} in $CODENAME"

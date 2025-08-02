@@ -1,0 +1,7 @@
+Origin: Valkey APT Repo
+Label: Valkey
+Codename: stable
+Architectures: amd64
+Components: main
+Description: APT repository for Valkey packages
+SignWith: default  # If you have GPG key; otherwise, remove for unsigned repo

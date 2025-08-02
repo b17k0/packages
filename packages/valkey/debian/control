@@ -1,0 +1,33 @@
+Source: valkey
+Section: database
+Priority: optional
+Maintainer: Your Name <packages@bil.co.ua>
+Build-Depends: debhelper (>= 13), build-essential, libssl-dev, libsystemd-dev, zlib1g-dev, pkg-config, autoconf
+Standards-Version: 4.5.1
+Homepage: https://valkey.io
+Vcs-Git: https://github.com/valkey-io/valkey.git
+
+Package: valkey-server
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, lsb-base (>= 3.0-6)
+Recommends: logrotate
+Description: Persistent key-value database with network interface (server)
+ Valkey is an advanced key-value store. It is often referred to as a data
+ structure server since keys can contain strings, hashes, lists, sets and
+ sorted sets.
+ .
+ This package contains the Valkey server.
+
+Package: valkey-sentinel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, valkey-server
+Description: Persistent key-value database with network interface (sentinel)
+ Valkey Sentinel provides high availability for Valkey. It monitors Valkey
+ instances and automatically performs failover.
+
+Package: valkey-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Persistent key-value database with network interface (client tools)
+ This package contains supporting administrative tools: valkey-cli,
+ valkey-benchmark, and valkey-check-aof.
