@@ -1,5 +1,5 @@
 # Stage 1: Builder (compile and package)
-ARG DISTRO=debian:12-slim
+ARG DISTRO=debian:12
 FROM ${DISTRO} AS builder
 
 # Valkey release tag to build (passed from GitHub Actions; default for testing)
@@ -29,7 +29,14 @@ RUN apt update && \
         librdmacm-dev \
         libibverbs-dev \
         rdma-core \
-        fakeroot && \
+        fakeroot \
+        liblua5.1-0-dev \
+        liblzf-dev \
+        lua-bitop-dev \
+        lua-cjson-dev \
+        procps \
+        tcl \
+        tcl-tls && \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         apt install -y libatomic1; \
     fi && \
