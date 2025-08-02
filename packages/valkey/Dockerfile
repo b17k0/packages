@@ -14,7 +14,21 @@ ARG ARCH=amd64
 # Install build dependencies required for compilation and packaging
 # Adjust based on architecture (e.g., libatomic for arm64)
 RUN apt update && \
-    apt install -y build-essential curl git autoconf pkg-config libssl-dev libsystemd-dev zlib1g-dev debhelper librdmacm-dev libibverbs-dev rdma-core && \
+    apt install -y \
+        build-essential \
+        curl \
+        git \
+        autoconf \
+        pkg-config \
+        libssl-dev \
+        libsystemd-dev \
+        zlib1g-dev \
+        debhelper \
+        libhiredis-dev \
+        libjemalloc-dev \
+        librdmacm-dev \
+        libibverbs-dev \
+        rdma-core && \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         apt install -y libatomic1; \
     fi && \
@@ -31,6 +45,9 @@ RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}
 # Compile binaries from sources with version-specific and arch-specific flags
 RUN cd valkey-${RELEASE_TAG} && \
     MAKE_FLAGS="SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes" && \
+    if [ "$MAJOR" != "7" ]; then \
+        MAKE_FLAGS="$MAKE_FLAGS BUILD_RDMA=yes"; \
+    fi && \
     # For arm64, ensure atomic ops are handled (libatomic already installed)
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         MAKE_FLAGS="$MAKE_FLAGS CFLAGS+=-latomic"; \

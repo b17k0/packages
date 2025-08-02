@@ -2,14 +2,32 @@ Source: valkey
 Section: database
 Priority: optional
 Maintainer: Your Name <packages@bil.co.ua>
-Build-Depends: debhelper (>= 13), build-essential, libssl-dev, libsystemd-dev, zlib1g-dev, pkg-config, autoconf
-Standards-Version: 4.5.1
+Build-Depends:
+ debhelper-compat (= 13),
+ libhiredis-dev,
+ libjemalloc-dev [linux-any],
+ liblua5.1-dev,
+ liblzf-dev,
+ libssl-dev,
+ libsystemd-dev,
+ lua-bitop-dev,
+ lua-cjson-dev,
+ openssl <!nocheck>,
+ pkgconf,
+ procps <!nocheck>,
+ tcl <!nocheck>,
+ tcl-tls <!nocheck>,
+Standards-Version: 4.7.2
 Homepage: https://valkey.io
 Vcs-Git: https://github.com/valkey-io/valkey.git
 
 Package: valkey-server
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, lsb-base (>= 3.0-6)
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ valkey-tools (= ${binary:Version}),
+ ${misc:Depends},
 Recommends: logrotate
 Description: Persistent key-value database with network interface (server)
  Valkey is an advanced key-value store. It is often referred to as a data
@@ -20,14 +38,23 @@ Description: Persistent key-value database with network interface (server)
 
 Package: valkey-sentinel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, valkey-server
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ valkey-tools (= ${binary:Version}),
+ ${misc:Depends},
 Description: Persistent key-value database with network interface (sentinel)
  Valkey Sentinel provides high availability for Valkey. It monitors Valkey
  instances and automatically performs failover.
 
 Package: valkey-tools
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends:
+ adduser,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Suggests:
+ ruby-redis,
 Description: Persistent key-value database with network interface (client tools)
  This package contains supporting administrative tools: valkey-cli,
  valkey-benchmark, and valkey-check-aof.
