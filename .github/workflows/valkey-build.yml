@@ -52,8 +52,12 @@ jobs:
             echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
             MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
             echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
-            echo "distros_list=${{ env.DISTROS }}" >> $GITHUB_OUTPUT
-            echo "archs_list=${{ env.ARCHS }}" >> $GITHUB_OUTPUT
+            echo "distros_list<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ env.DISTROS }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "archs_list<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ env.ARCHS }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "${{ env.LATEST_TAG }}" > last_release.txt
           else
             echo "new_release=false" >> $GITHUB_OUTPUT
@@ -79,8 +83,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const distros = "${{ env.DISTROS }}".trim().split(/\s+/);
-            const archs = "${{ env.ARCHS }}".trim().split(/\s+/);
+            const distros = "${{ needs.check-release.outputs.distros_list }}".trim().split(/\s+/);
+            const archs = "${{ needs.check-release.outputs.archs_list }}".trim().split(/\s+/);
             const matrix = { distro: distros, arch: archs };
             core.setOutput('matrix', JSON.stringify(matrix));
 
