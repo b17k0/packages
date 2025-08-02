@@ -43,7 +43,7 @@ RUN cd valkey-${RELEASE_TAG} && \
     make install DESTDIR=/tmp/valkey-install PREFIX=/usr
 
 # Copy custom debian/ directory from the host repository
-COPY debian/ valkey-${RELEASE_TAG}/debian/
+COPY packages/valkey/debian/ valkey-${RELEASE_TAG}/debian/
 
 # Build Debian packages using dpkg-buildpackage (now that binaries are compiled)
 # Set DEB_BUILD_OPTIONS for parallel build and architecture
