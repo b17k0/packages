@@ -30,10 +30,7 @@ RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}
 
 # Compile binaries from sources with version-specific and arch-specific flags
 RUN cd valkey-${RELEASE_TAG} && \
-    MAKE_FLAGS="SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes USE_REDIS_SYMLINKS=no" && \
-    if [ "$MAJOR" != "7" ]; then \
-        MAKE_FLAGS="$MAKE_FLAGS BUILD_RDMA=yes"; \
-    fi && \
+    MAKE_FLAGS="SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes" && \
     # For arm64, ensure atomic ops are handled (libatomic already installed)
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         MAKE_FLAGS="$MAKE_FLAGS CFLAGS+=-latomic"; \
