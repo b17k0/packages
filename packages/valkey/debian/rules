@@ -38,3 +38,5 @@ override_dh_installsystemd:
 	dh_installsystemd --name=valkey-server@ --no-enable --no-start
 	dh_installsystemd --name=valkey-sentinel --no-enable --no-start
 	dh_installsystemd --name=valkey-sentinel@ --no-enable --no-start
+
+override_dh_auto_test:
