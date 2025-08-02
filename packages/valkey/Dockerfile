@@ -1,15 +1,17 @@
 # Stage 1: Builder (compile and package)
-ARG DISTRO=debian:12
+ARG DISTRO=debian:12-slim
 FROM ${DISTRO} AS builder
 
-
+# Valkey release tag to build (passed from GitHub Actions; default for testing)
 ARG RELEASE_TAG=8.1.3
+
+# Major version (e.g., 7 or 8, parsed in workflow; default for testing)
 ARG MAJOR=8
+
+# Architecture (e.g., amd64, arm64)
 ARG ARCH=amd64
 
-WORKDIR /valkey-src
-
-# Install build dependencies required for compilation and packaging
+# Install build dependencies required for compilation and packaging in one layer
 # Adjust based on architecture (e.g., libatomic for arm64)
 RUN apt update && \
     apt install -y \
@@ -26,12 +28,16 @@ RUN apt update && \
         libjemalloc-dev \
         librdmacm-dev \
         libibverbs-dev \
-        rdma-core && \
+        rdma-core \
+        fakeroot && \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         apt install -y libatomic1; \
     fi && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Set working directory for source code
+WORKDIR /valkey-src
 
 # Download, extract, clean, and compile sources
 RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}.tar.gz -o valkey.tar.gz && \
@@ -47,16 +53,16 @@ RUN if [ "$MAJOR" != "7" ]; then \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         export MAKE_FLAGS="$MAKE_FLAGS CFLAGS+=-latomic"; \
     fi && \
-    make -j$(nproc) $MAKE_FLAGS && \
-    make install DESTDIR=/tmp/valkey-install PREFIX=/usr
+    make -j$(nproc) $MAKE_FLAGS install DESTDIR=/tmp/valkey-install PREFIX=/usr
 
 # Copy custom debian/ directory from the host repository
 COPY packages/valkey/debian/ debian/
 
 # Build Debian packages using dpkg-buildpackage
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"
-RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH}
+RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH} && \
+    rm -rf /valkey-src/* # Clean up source after build to reduce layer size
 
 # Stage 2: Output (extract only .deb files for clean export)
 FROM scratch AS output
-COPY --from=builder /valkey-src/*.deb /
+COPY --from=builder /*.deb /
