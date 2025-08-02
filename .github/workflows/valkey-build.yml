@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if no new release (true/false)'
+        required: false
+        default: 'false'
 
 jobs:
   check-release:
@@ -56,7 +61,7 @@ jobs:
 
   build-packages:
     needs: check-release
-    if: needs.check-release.outputs.new_release == 'true'
+    if: needs.check-release.outputs.new_release == 'true' || github.event.inputs.force_build == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -94,7 +99,7 @@ jobs:
 
   create-repo:
     needs: [check-release, build-packages]
-    if: needs.check-release.outputs.new_release == 'true'
+    if: needs.check-release.outputs.new_release == 'true' || github.event.inputs.force_build == 'true'
     runs-on: ubuntu-latest
 
     steps:
