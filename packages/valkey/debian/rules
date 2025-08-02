@@ -20,14 +20,12 @@ endif
 
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -f src/release.h debian/*.service
 
 override_dh_auto_build:
 	dh_auto_build -- V=1 USE_SYSTEM_JEMALLOC=yes USE_SYSTEMD=yes USE_JEMALLOC=yes
 
 override_dh_auto_install:
 	dh_auto_install
-	debian/bin/generate-systemd-service-files
 
 override_dh_compress:
 	dh_compress -Xvalkey-trib.rb
