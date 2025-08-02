@@ -14,7 +14,7 @@ ARG ARCH=amd64
 # Install build dependencies required for compilation and packaging
 # Adjust based on architecture (e.g., libatomic for arm64)
 RUN apt update && \
-    apt install -y build-essential curl git autoconf pkg-config libssl-dev libsystemd-dev zlib1g-dev debhelper && \
+    apt install -y build-essential curl git autoconf pkg-config libssl-dev libsystemd-dev zlib1g-dev debhelper librdmacm-dev libibverbs-dev rdma-core && \
     if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
         apt install -y libatomic1; \
     fi && \
