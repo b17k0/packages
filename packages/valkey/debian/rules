@@ -25,10 +25,10 @@ override_dh_auto_build:
 	dh_auto_build -- V=1 USE_SYSTEM_JEMALLOC=yes USE_SYSTEMD=yes USE_JEMALLOC=yes
 
 override_dh_auto_install:
-	dh_auto_install
-
-override_dh_compress:
-	dh_compress -Xvalkey-trib.rb
+	dh_auto_install -- PREFIX=/usr DESTDIR=$(CURDIR)/debian/tmp
+	debian/bin/generate-systemd-service-files
+	mkdir -p debian/tmp/lib/systemd/system
+	mv debian/*.service debian/tmp/lib/systemd/system/ || true
 
 override_dh_installchangelogs:
 	dh_installchangelogs --keep 00-RELEASENOTES

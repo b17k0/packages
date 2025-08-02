@@ -2,5 +2,5 @@ usr/bin/valkey-server
 usr/bin/valkey-check-rdb
 usr/bin/valkey-check-aof
 etc/valkey/valkey.conf etc/valkey/
-etc/init.d/valkey-server etc/init.d/  # If not using systemd
+etc/init.d/valkey-server etc/init.d/
 lib/systemd/system/valkey-server.service lib/systemd/system/
