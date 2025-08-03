@@ -56,18 +56,20 @@ RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}
 # Copy custom debian/ directory from the host repository (includes updated rules and *.install files)
 COPY packages/valkey/debian/ debian/
 
-# Debug: Print current directory and tree structure
-RUN pwd
-RUN tree
+
 
 # Export MAJOR for use in debian/rules
 ENV MAJOR=${MAJOR}
 
 # Build Debian packages using dpkg-buildpackage
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"
-RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH} && \
-    rm -rf /valkey-src/* # Clean up source after build to reduce layer size
+RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH} || true; \
+    rm -rf /valkey-src/*
 
-# Stage 2: Output (extract only .deb files for clean export)
-FROM scratch AS output
-COPY --from=builder /*.deb /
+# Debug: Print current directory and tree structure
+RUN pwd
+RUN tree
+
+# # Stage 2: Output (extract only .deb files for clean export)
+# FROM scratch AS output
+# COPY --from=builder /*.deb /
