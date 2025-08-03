@@ -1,0 +1,62 @@
+Package: valkey-sentinel
+Source: valkey
+Version: 8.1.3-1~noble
+Architecture: arm64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 3843
+Depends: valkey-tools (= 8.1.3-1~noble)
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/noble/v/valkey/valkey-sentinel_8.1.3-1~noble_arm64.deb
+Size: 1426356
+SHA256: b5d0852f57f87e3b6e5494656c60cafe5f471bebb25104c4f5e339ab1fac2ab9
+SHA1: 0c0217764283eaa85a56f98985de2331a94da30e
+MD5sum: 13a1554c2ec195dfb7ba808b1cb67a26
+Description: Persistent key-value database with network interface (sentinel)
+ Valkey Sentinel provides high availability for Valkey. It monitors Valkey
+ instances and automatically performs failover.
+
+Package: valkey-server
+Source: valkey
+Version: 8.1.3-1~noble
+Architecture: arm64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 3955
+Depends: valkey-tools (= 8.1.3-1~noble)
+Recommends: logrotate
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/noble/v/valkey/valkey-server_8.1.3-1~noble_arm64.deb
+Size: 1455980
+SHA256: 94885d6619c90252b173e1ee3132bf08c7311081798c9b2496d1b6062130fd36
+SHA1: b0ddb3e629a216a8a08030f1c7d34c0233266287
+MD5sum: 09c683ac7a5ac78cd214581c6ef47696
+Description: Persistent key-value database with network interface (server)
+ Valkey is an advanced key-value store. It is often referred to as a data
+ structure server since keys can contain strings, hashes, lists, sets and
+ sorted sets.
+ .
+ This package contains the Valkey server.
+
+Package: valkey-tools
+Source: valkey
+Version: 8.1.3-1~noble
+Architecture: arm64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 9729
+Depends: adduser, libc6 (>= 2.38), libssl3t64 (>= 3.0.0), libsystemd0
+Suggests: ruby-redis
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/noble/v/valkey/valkey-tools_8.1.3-1~noble_arm64.deb
+Size: 1710790
+SHA256: c3d90d23b48e2b821369d33c60382df16047ef7ca6c7b215de845fe1b58f483b
+SHA1: 5af51ea8bcad8708c1904af43476e8466ece46b4
+MD5sum: eb2eeba6d444ead7f9d75858b621885a
+Description: Persistent key-value database with network interface (client tools)
+ This package contains supporting administrative tools: valkey-cli,
+ valkey-benchmark, and valkey-check-aof.
+

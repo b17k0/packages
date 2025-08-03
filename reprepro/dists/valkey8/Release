@@ -1,0 +1,25 @@
+Codename: valkey8
+Date: Sun, 03 Aug 2025 18:18:20 UTC
+Architectures: amd64 arm64
+Components: noble
+MD5Sum:
+ c201ef7595e893cb674df7e704c39eec 2248 noble/binary-amd64/Packages
+ 553212efc2a3d25fdfcc686e98f84f04 959 noble/binary-amd64/Packages.gz
+ 65654d33a557201060577533da8c38ac 37 noble/binary-amd64/Release
+ 0298465f314ea57bc263e1c3f63df72f 2247 noble/binary-arm64/Packages
+ 1e56f2ff5697ce4ec34e9576fd5f3cc7 957 noble/binary-arm64/Packages.gz
+ 036c1070dfdfcbc764b95212fec1b754 37 noble/binary-arm64/Release
+SHA1:
+ 1f76ddb73344c2f1325576a8e4916b0ec44848dc 2248 noble/binary-amd64/Packages
+ 05185b0acaf8361d52f3d4d6b1190f00431366b8 959 noble/binary-amd64/Packages.gz
+ f11f3838659bac7ad5f37de120f1504a7510efb2 37 noble/binary-amd64/Release
+ 8993276261f271bcab161cbe5ac4e4d6eb8e28f8 2247 noble/binary-arm64/Packages
+ 60ad2281c10da45b009def662d0bcacf662d9f86 957 noble/binary-arm64/Packages.gz
+ 85db0b9d42a114201f84dcf70f1bde2d3d0811c6 37 noble/binary-arm64/Release
+SHA256:
+ 5a54cc2fea97dfc38d85443abc363612a536bb79519076be8f8d1ca2845185d3 2248 noble/binary-amd64/Packages
+ a4d5d52a20219d144878eed9e5dd14262193544a1c0f751bf6fcb36da8ebf6ec 959 noble/binary-amd64/Packages.gz
+ bfe2a26d2db25b2aea73720007ebcc30be5210acc2b3271e08f2a4742f255ebb 37 noble/binary-amd64/Release
+ 4a4cd6efc499f8058f9c0ad912af94c6ad6c54ec84a8a9e2b3d6927def0458d5 2247 noble/binary-arm64/Packages
+ 31dc6cada954088c1fa184c58914972c33d144dc867d62280dc3718aa7c5d116 957 noble/binary-arm64/Packages.gz
+ ca01b2d77119265575f9878e759d9488a7b8dfc824685aaf7f9be713ff9b333a 37 noble/binary-arm64/Release
