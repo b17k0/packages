@@ -67,8 +67,10 @@ RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH} || true; \
     rm -rf /valkey-src/*
 
 # Debug: Print current directory and tree structure
-RUN pwd
+RUN pwd /
 RUN tree
+
+false
 
 # # Stage 2: Output (extract only .deb files for clean export)
 # FROM scratch AS output
