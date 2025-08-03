@@ -114,10 +114,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Checkout existing gh-pages
+      - name: Checkout existing apt branch
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          ref: apt
           path: repo
         continue-on-error: true
 
@@ -236,7 +236,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./repo
-          publish_branch: gh-pages
+          publish_branch: apt
           keep_files: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
 
