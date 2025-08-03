@@ -127,6 +127,8 @@ jobs:
           sudo apt install -y reprepro gh jq
 
       - name: Download and include packages dynamically
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           MAJOR="${{ needs.check-release.outputs.major_version }}"
           CODENAME="valkey$MAJOR"
