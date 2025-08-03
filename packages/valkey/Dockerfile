@@ -18,6 +18,7 @@ RUN apt update && \
         build-essential \
         curl \
         git \
+        tree \
         autoconf \
         pkg-config \
         libssl-dev \
@@ -64,6 +65,9 @@ RUN if [ "$MAJOR" != "7" ]; then \
 
 # Copy custom debian/ directory from the host repository
 COPY packages/valkey/debian/ debian/
+
+RUN pwd
+RUN tree
 
 # Build Debian packages using dpkg-buildpackage
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"
