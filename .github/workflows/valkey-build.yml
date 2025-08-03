@@ -1,14 +1,14 @@
-name: Check and Build Valkey Releases
+name: Valkey Releases
 
 on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
-      force_build:
-        description: 'Force build even if no new release (true/false)'
+      release_tag:
+        description: 'Optional custom release tag to build (if empty, use latest)'
         required: false
-        default: 'false'
+        default: ''
 
 jobs:
   check-release:
@@ -40,10 +40,17 @@ jobs:
           if [ -z "$LATEST_TAG" ]; then echo "Error: Failed to fetch latest tag"; exit 1; fi
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
+      - name: Override with custom tag if provided
+        if: github.event.inputs.release_tag != ''
+        run: |
+          echo "LATEST_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_ENV
+
       - name: Check if new release and parse major version
         id: check
         run: |
-          if [ "${{ env.LATEST_TAG }}" != "${{ env.LAST_RELEASE }}" ]; then
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "new_release=true" >> $GITHUB_OUTPUT
+          elif [ "${{ env.LATEST_TAG }}" != "${{ env.LAST_RELEASE }}" ]; then
             echo "new_release=true" >> $GITHUB_OUTPUT
             echo "${{ env.LATEST_TAG }}" > last_release.txt
           else
@@ -55,7 +62,7 @@ jobs:
           echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
 
       - name: Commit last release update
-        if: steps.check.outputs.new_release == 'true'
+        if: github.event_name == 'schedule' && steps.check.outputs.new_release == 'true'
         uses: EndBug/add-and-commit@v9
         with:
           message: "Update last processed release to ${{ env.LATEST_TAG }}"
@@ -63,7 +70,7 @@ jobs:
 
   build-packages:
     needs: check-release
-    if: needs.check-release.outputs.new_release == 'true' || github.event.inputs.force_build == 'true'
+    if: (github.event_name == 'schedule' && needs.check-release.outputs.new_release == 'true') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -107,7 +114,7 @@ jobs:
 
   create-repo:
     needs: [check-release, build-packages]
-    if: needs.check-release.outputs.new_release == 'true' || github.event.inputs.force_build == 'true'
+    if: (github.event_name == 'schedule' && needs.check-release.outputs.new_release == 'true') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -239,4 +246,3 @@ jobs:
           publish_branch: apt
           keep_files: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
-
