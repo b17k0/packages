@@ -1,5 +1,3 @@
 usr/bin/valkey-server
-usr/bin/valkey-check-rdb
-usr/bin/valkey-check-aof
-etc/valkey/valkey.conf etc/valkey/
-etc/init.d/valkey-server etc/init.d/
+etc/valkey/valkey.conf
+

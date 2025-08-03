@@ -47,27 +47,21 @@ RUN apt update && \
 # Set working directory for source code
 WORKDIR /valkey-src
 
-# Download, extract, clean, and compile sources
+# Download, extract, clean, and prepare sources
 RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}.tar.gz -o valkey.tar.gz && \
     tar xzf valkey.tar.gz --strip-components=1 && \
     rm valkey.tar.gz && \
     make distclean
 
-# Compile binaries with version-specific and arch-specific flags
-ENV MAKE_FLAGS="SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes USE_REDIS_SYMLINKS=no"
-RUN if [ "$MAJOR" != "7" ]; then \
-        export MAKE_FLAGS="$MAKE_FLAGS BUILD_RDMA=yes"; \
-    fi && \
-    if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
-        export MAKE_FLAGS="$MAKE_FLAGS CFLAGS+=-latomic"; \
-    fi && \
-    make -j$(nproc) $MAKE_FLAGS install DESTDIR=/tmp/valkey-install PREFIX=/usr
-
-# Copy custom debian/ directory from the host repository
+# Copy custom debian/ directory from the host repository (includes updated rules and *.install files)
 COPY packages/valkey/debian/ debian/
 
+# Debug: Print current directory and tree structure
 RUN pwd
-RUN tree /
+RUN tree
+
+# Export MAJOR for use in debian/rules
+ENV MAJOR=${MAJOR}
 
 # Build Debian packages using dpkg-buildpackage
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"

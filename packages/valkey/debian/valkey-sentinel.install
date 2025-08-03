@@ -1,1 +1,1 @@
-sentinel.conf	/etc/valkey
+etc/valkey/sentinel.conf

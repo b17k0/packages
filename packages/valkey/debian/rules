@@ -15,14 +15,26 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 	export MAKEFLAGS
 endif
 
+# Custom MAKE_FLAGS logic (moved from Dockerfile)
+export MAKE_FLAGS = SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes USE_REDIS_SYMLINKS=no
+
+override_dh_auto_configure:
+	# Conditional flags for MAJOR and architecture
+	if [ "$MAJOR" -ge 8 ]; then \
+		export MAKE_FLAGS="$$MAKE_FLAGS BUILD_RDMA=yes"; \
+	fi
+	if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+		export MAKE_FLAGS="$$MAKE_FLAGS CFLAGS+=-latomic"; \
+	fi
+
 %:
 	dh $@
 
 override_dh_auto_clean:
 	dh_auto_clean
 
-override_dh_auto_build:
-	dh_auto_build -- V=1 USE_SYSTEM_JEMALLOC=yes USE_SYSTEMD=yes USE_JEMALLOC=yes
+override_dh_auto_build: override_dh_auto_configure
+	dh_auto_build -- V=1 USE_SYSTEM_JEMALLOC=yes USE_SYSTEMD=yes USE_JEMALLOC=yes $(MAKE_FLAGS)
 
 override_dh_auto_install:
 	dh_auto_install
