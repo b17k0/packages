@@ -153,9 +153,11 @@ jobs:
           echo "Debug: Raw API response: $RAW_JSON"
           
           ARTIFACT_NAMES=$(echo "$RAW_JSON" | jq -r '.artifacts[].name | select(startswith("packages-"))')
+          
           if [ -z "$ARTIFACT_NAMES" ]; then
             echo "Error: No packages artifacts found!"; exit 1;
           fi
+          
           echo "Debug: Artifact names: $ARTIFACT_NAMES"
           
           # Loop through each artifact name
@@ -210,9 +212,12 @@ jobs:
               continue
             fi
             
-            # Include debs (move --component before files)
-            echo "Debug: Including debs with command: reprepro -b repo/reprepro includedeb $CODENAME --component $component \"$temp_dir\"/*.deb"
-            reprepro -b repo/reprepro includedeb $CODENAME --component $component "$temp_dir"/*.deb
+            # Debug: List of deb files to include
+            echo "Debug: Deb files to include: ${deb_files[*]}"
+            
+            # Include debs (move --component BEFORE includedeb as global option)
+            echo "Debug: Including debs with command: reprepro -b repo/reprepro --component $component includedeb $CODENAME \"$temp_dir\"/*.deb"
+            reprepro -b repo/reprepro --component $component includedeb $CODENAME "$temp_dir"/*.deb
             
             rm -rf "$temp_dir"
           done
