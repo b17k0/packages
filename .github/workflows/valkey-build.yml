@@ -138,6 +138,13 @@ jobs:
             touch "$DISTRIBUTIONS_FILE"
           fi
           
+          echo "Debug: Structure of repo directory:"
+          ls -la repo
+          echo "Debug: Structure of repo/reprepro:"
+          ls -la repo/reprepro || echo "repo/reprepro not found yet"
+          echo "Debug: Structure of repo/reprepro/conf:"
+          ls -la repo/reprepro/conf || echo "repo/reprepro/conf not found yet"
+          
           # Get current workflow run ID
           RUN_ID=${{ github.run_id }}
           
@@ -153,7 +160,7 @@ jobs:
           
           # Loop through each artifact name
           echo "$ARTIFACT_NAMES" | while read -r artifact_name; do
-            if [ -z "$artifact_name" ]; then continue; fi  # Пропустити порожні рядки
+            if [ -z "$artifact_name" ]; then continue; fi
             
             # Extract codename and arch from name (e.g., packages-bookworm-amd64 -> codename=bookworm, arch=amd64)
             component=$(echo "$artifact_name" | cut -d'-' -f2)
@@ -165,33 +172,41 @@ jobs:
             if ! grep -q "Codename: $CODENAME" "$DISTRIBUTIONS_FILE"; then
               echo -e "\nCodename: $CODENAME\nComponents: $component\nArchitectures: $arch" >> "$DISTRIBUTIONS_FILE"
             else
-              # Add component if not already present
-              CURRENT_COMPONENTS=$(sed -n "/Codename: $CODENAME/{n;p}" "$DISTRIBUTIONS_FILE" | grep "Components:" | cut -d' ' -f2-)
+              CURRENT_COMPONENTS=$(sed -n "/Codename: $CODENAME/{n;p}" "$DISTRIBUTIONS_FILE" | grep "Components:" | cut -d' ' -f2- | tr -s ' ')
               if ! echo "$CURRENT_COMPONENTS" | grep -q "$component"; then
                 NEW_COMPONENTS="$CURRENT_COMPONENTS $component"
                 sed -i "/Codename: $CODENAME/{n;s/^Components: .*/Components: $NEW_COMPONENTS/}" "$DISTRIBUTIONS_FILE"
               fi
               
-              # Add arch if not already present
-              CURRENT_ARCH=$(sed -n "/Codename: $CODENAME/{n;n;p}" "$DISTRIBUTIONS_FILE" | grep "Architectures:" | cut -d' ' -f2-)
+              CURRENT_ARCH=$(sed -n "/Codename: $CODENAME/{n;n;p}" "$DISTRIBUTIONS_FILE" | grep "Architectures:" | cut -d' ' -f2- | tr -s ' ')
               if ! echo "$CURRENT_ARCH" | grep -q "$arch"; then
                 NEW_ARCH="$CURRENT_ARCH $arch"
                 sed -i "/Codename: $CODENAME/{n;n;s/^Architectures: .*/Architectures: $NEW_ARCH/}" "$DISTRIBUTIONS_FILE"
               fi
             fi
             
-            # Debug
-            echo "Debug: Current distributions file:"
-            cat "$DISTRIBUTIONS_FILE"
+            echo "Debug: Distributions file path: $DISTRIBUTIONS_FILE"
+            if [ -f "$DISTRIBUTIONS_FILE" ]; then
+              echo "Debug: Current distributions file exists and contains:"
+              cat "$DISTRIBUTIONS_FILE"
+            else
+              echo "Error: Distributions file not found after creation!"; exit 1;
+            fi
             
-            # Download and process packages
-            temp_dir="temp_pool/$component/$arch"
+            # Download and process packages (temp_dir inside repo/reprepro for consistency)
+            temp_dir="repo/reprepro/temp_pool/$component/$arch"
             mkdir -p "$temp_dir"
             
+            echo "Debug: Downloading artifact $artifact_name from run $RUN_ID to $temp_dir"
             gh run download $RUN_ID -n "$artifact_name" -D "$temp_dir" || { echo "Failed to download $artifact_name, skipping"; continue; }
             
+            # Debug: list files
+            echo "Debug: Contents of $temp_dir:"
+            ls -la "$temp_dir"
+            
             if ls "$temp_dir"/*.deb > /dev/null 2>&1; then
-              reprepro -b repo includedeb $CODENAME "$temp_dir"/*.deb --component $component
+              echo "Debug: Including debs with reprepro -b repo/reprepro"
+              reprepro -b repo/reprepro includedeb $CODENAME "$temp_dir"/*.deb --component $component
             else
               echo "No .deb files found in $temp_dir, skipping"
             fi
@@ -199,8 +214,14 @@ jobs:
             rm -rf "$temp_dir"
           done
           
-          # Export the distribution to update Release files (includes old packages in all components)
-          reprepro -b repo export $CODENAME
+          # Export the distribution to update Release files
+          echo "Debug: Exporting with reprepro -b repo/reprepro"
+          reprepro -b repo/reprepro export $CODENAME
+          
+          # Debug: Final structure after processing
+          echo "Debug: Final structure of repo/reprepro:"
+          tree repo/reprepro || ls -laR repo/reprepro
+
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
