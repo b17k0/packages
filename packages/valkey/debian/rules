@@ -10,19 +10,18 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,-no-as-needed -ldl -latomic -llzf
 
 # Build jemalloc in parallel
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-	MAKEFLAGS += -j$(NUMJOBS)
-	export MAKEFLAGS
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS)
+    export MAKEFLAGS
 endif
 
 # Custom MAKE_FLAGS logic (moved from Dockerfile)
 export MAKE_FLAGS = SERVER_CFLAGS='-Werror' BUILD_TLS=yes USE_FAST_FLOAT=yes USE_REDIS_SYMLINKS=no
 
 override_dh_auto_configure:
-	# Conditional flags for MAJOR and architecture
-	if [ "$MAJOR" -ge 8 ]; then \
+	if [ "$$MAJOR" -ge 8 ]; then \
 		export MAKE_FLAGS="$$MAKE_FLAGS BUILD_RDMA=yes"; \
-	fi
+	fi; \
 	if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
 		export MAKE_FLAGS="$$MAKE_FLAGS CFLAGS+=-latomic"; \
 	fi
@@ -43,9 +42,9 @@ override_dh_installchangelogs:
 	dh_installchangelogs --keep 00-RELEASENOTES
 
 override_dh_installsystemd:
-	dh_installsystemd --name=valkey-server --no-enable --no-start
-	dh_installsystemd --name=valkey-server@ --no-enable --no-start
-	dh_installsystemd --name=valkey-sentinel --no-enable --no-start
-	dh_installsystemd --name=valkey-sentinel@ --no-enable --no-start
+	dh_installsystemd --package=valkey-server --name=valkey-server --no-enable --no-start
+	dh_installsystemd --package=valkey-server --name=valkey-server@ --no-enable --no-start
+	dh_installsystemd --package=valkey-sentinel --name=valkey-sentinel --no-enable --no-start
+	dh_installsystemd --package=valkey-sentinel --name=valkey-sentinel@ --no-enable --no-start
 
 override_dh_auto_test:

@@ -1,7 +1,7 @@
 Source: valkey
 Section: database
 Priority: optional
-Maintainer: Your Name <packages@bil.co.ua>
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
 Build-Depends:
  debhelper-compat (= 13),
  libhiredis-dev,

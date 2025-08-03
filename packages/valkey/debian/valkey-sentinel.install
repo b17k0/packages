@@ -1,1 +1,2 @@
-etc/valkey/sentinel.conf
+src/valkey-sentinel /usr/bin
+sentinel.conf       /etc/valkey

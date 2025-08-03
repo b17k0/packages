@@ -1,3 +1,2 @@
-usr/bin/valkey-server
-etc/valkey/valkey.conf
-
+src/valkey-server /usr/bin
+valkey.conf       /etc/valkey
