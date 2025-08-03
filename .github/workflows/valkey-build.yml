@@ -67,10 +67,10 @@ jobs:
       matrix:
         distro: 
           - debian:12
-          #- ubuntu:24.04
+          # - ubuntu:24.04
         arch:
           - amd64
-          #- arm64
+          # - arm64
 
     steps:
       - name: Checkout repository
@@ -85,6 +85,10 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
+      - name: Sanitize distro name
+        id: sanitize
+        run: echo "distro="${{ matrix.distro//[:\"<>|*?\\\/] }}"" >>"$GITHUB_OUTPUT"
+
       - name: Build deb packages in Docker
         run: |
           docker buildx build --platform linux/${{ matrix.arch }} \
@@ -98,7 +102,7 @@ jobs:
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ matrix.distro }}-${{ matrix.arch }}
+          name: packages-${{ steps.sanitize.outputs.distro }}-${{ matrix.arch }}
           path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
 
   create-repo:
@@ -122,7 +126,7 @@ jobs:
           sudo apt update
           sudo apt install -y reprepro gh jq
 
-      - name: Download and include packages using GitHub API (automatic, no hard-coded lists)
+      - name: Download and include packages using GitHub API
         run: |
           CODENAME="valkey${{ needs.check-release.outputs.major_version }}"
           mkdir -p repo/reprepro/conf
@@ -134,7 +138,6 @@ jobs:
           
           # Get current workflow run ID
           RUN_ID=${{ github.run_id }}
-          
           # Get list of all artifacts via GitHub API (filter packages-*)
           ARTIFACTS_JSON=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts | jq '.artifacts | map(select(.name | startswith("packages-")))')
           
@@ -150,7 +153,7 @@ jobs:
             arch=$(echo "$artifact_name" | cut -d'-' -f3)
             
             echo "Downloading and processing $artifact_name (distro=$distro, arch=$arch)"
-            pool_dir="repo/pool/${distro//:/}/$arch"  # e.g., repo/pool/debian12/arm64
+            pool_dir="repo/pool/${distro//:/}/$arch"  # e.g., repo/pool/debian12/amd64
             mkdir -p "$pool_dir"
             
             # Download artifact
