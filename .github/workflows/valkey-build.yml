@@ -67,14 +67,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        os:
+          - image: "debian:12"
+            codename: "bookworm"
+          - image: "ubuntu:24.04"
+            codename: "noble"
         arch: 
           - amd64
           - arm64
-        include:
-          - image: debian:12
-            codename: bookworm
-          - image: ubuntu:24.04
-            codename: noble
 
     steps:
       - name: Checkout repository
@@ -84,7 +84,7 @@ jobs:
         run: |
           cd packages/valkey
           if [ ! -f debian/changelog ]; then echo "Changelog not found!"; exit 1; fi
-          sed -i "1s/^.*$/valkey (${{ needs.check-release.outputs.release_tag }}-1~${{ matrix.codename }}) ${{ matrix.codename }}; urgency=medium/" debian/changelog
+          sed -i "1s/^.*$/valkey (${{ needs.check-release.outputs.release_tag }}-1~${{ matrix.os.codename }}) ${{ matrix.os.codename }}; urgency=medium/" debian/changelog
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
@@ -92,18 +92,18 @@ jobs:
       - name: Build deb packages in Docker
         run: |
           docker buildx build --platform linux/${{ matrix.arch }} \
-            --build-arg DISTRO=${{ matrix.image }} \
+            --build-arg DISTRO=${{ matrix.os.image }} \
             --build-arg RELEASE_TAG=${{ needs.check-release.outputs.release_tag }} \
             --build-arg MAJOR=${{ needs.check-release.outputs.major_version }} \
             --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=./build/${{ matrix.codename }}-${{ matrix.arch }} \
+            --output type=local,dest=./build/${{ matrix.os.codename }}-${{ matrix.arch }} \
             -f packages/valkey/Dockerfile .
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ matrix.codename }}-${{ matrix.arch }}
-          path: ./build/${{ matrix.codename }}-${{ matrix.arch }}/*.deb
+          name: packages-${{ matrix.os.codename }}-${{ matrix.arch }}
+          path: ./build/${{ matrix.os.codename }}-${{ matrix.arch }}/*.deb
 
   create-repo:
     needs: [check-release, build-packages]
