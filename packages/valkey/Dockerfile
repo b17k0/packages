@@ -67,7 +67,7 @@ RUN if [ "$MAJOR" != "7" ]; then \
 COPY packages/valkey/debian/ debian/
 
 RUN pwd
-RUN tree
+RUN tree /
 
 # Build Debian packages using dpkg-buildpackage
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"
