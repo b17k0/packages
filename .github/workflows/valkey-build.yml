@@ -37,6 +37,7 @@ jobs:
         run: |
           LATEST_TAG=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/valkey-io/valkey/releases/latest | jq -r '.tag_name')
+          if [ -z "$LATEST_TAG" ]; then echo "Error: Failed to fetch latest tag"; exit 1; fi
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
       - name: Check if new release and parse major version
@@ -50,6 +51,7 @@ jobs:
           fi
           echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
           MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
+          if [ -z "$MAJOR" ]; then echo "Error: Invalid major version"; exit 1; fi
           echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
 
       - name: Commit last release update
@@ -65,12 +67,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        distro: 
-          - debian:12
-          # - ubuntu:24.04
-        arch:
+        arch: 
           - amd64
           # - arm64
+        include:
+          - image: debian:12
+            codename: bookworm
+          # - image: ubuntu:24.04
+          #   codename: noble
 
     steps:
       - name: Checkout repository
@@ -80,30 +84,26 @@ jobs:
         run: |
           cd packages/valkey
           if [ ! -f debian/changelog ]; then echo "Changelog not found!"; exit 1; fi
-          sed -i "1s/.*/valkey (${{ needs.check-release.outputs.release_tag }}-1) unstable; urgency=medium/" debian/changelog
+          sed -i "1s/^.*$/valkey (${{ needs.check-release.outputs.release_tag }}-1~${{ matrix.codename }}) ${{ matrix.codename }}; urgency=medium/" debian/changelog
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Sanitize distro name
-        id: sanitize
-        run: echo "distro="${{ matrix.distro//[:\"<>|*?\\\/] }}"" >>"$GITHUB_OUTPUT"
-
       - name: Build deb packages in Docker
         run: |
           docker buildx build --platform linux/${{ matrix.arch }} \
-            --build-arg DISTRO=${{ matrix.distro }} \
+            --build-arg DISTRO=${{ matrix.image }} \
             --build-arg RELEASE_TAG=${{ needs.check-release.outputs.release_tag }} \
             --build-arg MAJOR=${{ needs.check-release.outputs.major_version }} \
             --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=./build/${{ matrix.distro }}-${{ matrix.arch }} \
+            --output type=local,dest=./build/${{ matrix.codename }}-${{ matrix.arch }} \
             -f packages/valkey/Dockerfile .
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ steps.sanitize.outputs.distro }}-${{ matrix.arch }}
-          path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
+          name: packages-${{ matrix.codename }}-${{ matrix.arch }}
+          path: ./build/${{ matrix.codename }}-${{ matrix.arch }}/*.deb
 
   create-repo:
     needs: [check-release, build-packages]
@@ -126,46 +126,68 @@ jobs:
           sudo apt update
           sudo apt install -y reprepro gh jq
 
-      - name: Download and include packages using GitHub API
+      - name: Download and include packages dynamically
         run: |
-          CODENAME="valkey${{ needs.check-release.outputs.major_version }}"
+          MAJOR="${{ needs.check-release.outputs.major_version }}"
+          CODENAME="valkey$MAJOR"
           mkdir -p repo/reprepro/conf
-          if [ ! -f repo/reprepro/conf/distributions ]; then
-            cp reprepro/conf/distributions repo/reprepro/conf/distributions 2>/dev/null || \
-              echo -e "Codename: stable\nComponents: main\nArchitectures: amd64" > repo/reprepro/conf/distributions
+          DISTRIBUTIONS_FILE="repo/reprepro/conf/distributions"
+          if [ ! -f "$DISTRIBUTIONS_FILE" ]; then
+            touch "$DISTRIBUTIONS_FILE"
           fi
-          sed -i "s/Codename: .*/Codename: $CODENAME/" repo/reprepro/conf/distributions
           
           # Get current workflow run ID
           RUN_ID=${{ github.run_id }}
-          # Get list of all artifacts via GitHub API (filter packages-*)
-          ARTIFACTS_JSON=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts | jq '.artifacts | map(select(.name | startswith("packages-")))')
           
-          # List of unique architectures from artifacts (for reprepro conf)
-          ARCH_LIST=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name | split("-")[2]' | sort | uniq | paste -s -d ' ')
-          sed -i "s/^Architectures: .*/Architectures: $ARCH_LIST/" repo/reprepro/conf/distributions
+          # Get list of artifact names via GitHub API (only names, minimal jq)
+          ARTIFACT_NAMES=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts | jq -r '.artifacts | map(select(.name | startswith("packages-"))).name')
+          if [ -z "$ARTIFACT_NAMES" ]; then
+            echo "Error: No packages artifacts found!"; exit 1;
+          fi
           
-          # Loop through each artifact
-          ARTIFACT_NAMES=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name')
-          for artifact_name in $ARTIFACT_NAMES; do
-            # Extract distro and arch from name (e.g., packages-debian:12-amd64 -> distro=debian:12, arch=amd64)
-            distro=$(echo "$artifact_name" | cut -d'-' -f2)
+          # Loop through each artifact name
+          echo "$ARTIFACT_NAMES" | while read artifact_name; do
+            # Extract codename and arch from name (e.g., packages-bookworm-amd64 -> codename=bookworm, arch=amd64)
+            component=$(echo "$artifact_name" | cut -d'-' -f2)
             arch=$(echo "$artifact_name" | cut -d'-' -f3)
             
-            echo "Downloading and processing $artifact_name (distro=$distro, arch=$arch)"
-            pool_dir="repo/pool/${distro//:/}/$arch"  # e.g., repo/pool/debian12/amd64
-            mkdir -p "$pool_dir"
+            echo "Processing $artifact_name (CODENAME=$CODENAME, component=$component, arch=$arch)"
             
-            # Download artifact
-            gh artifact download --name "$artifact_name" --dir "$pool_dir" || echo "Failed to download $artifact_name, skipping"
-            
-            # Include debs in reprepro if files exist
-            if ls "$pool_dir"/*.deb > /dev/null 2>&1; then
-              reprepro -b repo includedeb $CODENAME "$pool_dir"/*.deb
+            # Add or update section in distributions if not exists
+            if ! grep -q "Codename: $CODENAME" "$DISTRIBUTIONS_FILE"; then
+              echo -e "\nCodename: $CODENAME\nComponents: $component\nArchitectures: $arch" >> "$DISTRIBUTIONS_FILE"
+            else
+              # Add component if not already present
+              CURRENT_COMPONENTS=$(sed -n "/Codename: $CODENAME/{n;p}" "$DISTRIBUTIONS_FILE" | grep "Components:" | cut -d' ' -f2-)
+              if ! echo "$CURRENT_COMPONENTS" | grep -q "$component"; then
+                NEW_COMPONENTS="$CURRENT_COMPONENTS $component"
+                sed -i "/Codename: $CODENAME/{n;s/^Components: .*/Components: $NEW_COMPONENTS/}" "$DISTRIBUTIONS_FILE"
+              fi
+              
+              # Add arch if not already present
+              CURRENT_ARCH=$(sed -n "/Codename: $CODENAME/{n;n;p}" "$DISTRIBUTIONS_FILE" | grep "Architectures:" | cut -d' ' -f2-)
+              if ! echo "$CURRENT_ARCH" | grep -q "$arch"; then
+                NEW_ARCH="$CURRENT_ARCH $arch"
+                sed -i "/Codename: $CODENAME/{n;n;s/^Architectures: .*/Architectures: $NEW_ARCH/}" "$DISTRIBUTIONS_FILE"
+              fi
             fi
+            
+            # Download and process packages
+            temp_dir="temp_pool/$component/$arch"
+            mkdir -p "$temp_dir"
+            
+            gh run download $RUN_ID -n "$artifact_name" -D "$temp_dir" || { echo "Failed to download $artifact_name, skipping"; continue; }
+            
+            if ls "$temp_dir"/*.deb > /dev/null 2>&1; then
+              reprepro -b repo includedeb $CODENAME "$temp_dir"/*.deb --component $component
+            else
+              echo "No .deb files found in $temp_dir, skipping"
+            fi
+            
+            rm -rf "$temp_dir"
           done
           
-          # Generate Release files
+          # Export the distribution to update Release files (includes old packages in all components)
           reprepro -b repo export $CODENAME
 
       - name: Deploy to GitHub Pages
@@ -175,4 +197,5 @@ jobs:
           publish_dir: ./repo
           publish_branch: gh-pages
           keep_files: true
-          commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }} in $CODENAME"
+          commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
+
