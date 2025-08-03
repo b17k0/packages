@@ -145,13 +145,16 @@ jobs:
           RAW_JSON=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts)
           echo "Debug: Raw API response: $RAW_JSON"
           
-          ARTIFACT_NAMES=$(echo "$RAW_JSON" | jq -r '.artifacts | map( select(.name | startswith("packages-")) | .name )')
+          ARTIFACT_NAMES=$(echo "$RAW_JSON" | jq -r '.artifacts[].name | select(startswith("packages-"))')
           if [ -z "$ARTIFACT_NAMES" ]; then
             echo "Error: No packages artifacts found!"; exit 1;
           fi
+          echo "Debug: Artifact names: $ARTIFACT_NAMES"
           
           # Loop through each artifact name
-          echo "$ARTIFACT_NAMES" | while read artifact_name; do
+          echo "$ARTIFACT_NAMES" | while read -r artifact_name; do
+            if [ -z "$artifact_name" ]; then continue; fi  # Пропустити порожні рядки
+            
             # Extract codename and arch from name (e.g., packages-bookworm-amd64 -> codename=bookworm, arch=amd64)
             component=$(echo "$artifact_name" | cut -d'-' -f2)
             arch=$(echo "$artifact_name" | cut -d'-' -f3)
@@ -176,6 +179,10 @@ jobs:
                 sed -i "/Codename: $CODENAME/{n;n;s/^Architectures: .*/Architectures: $NEW_ARCH/}" "$DISTRIBUTIONS_FILE"
               fi
             fi
+            
+            # Debug
+            echo "Debug: Current distributions file:"
+            cat "$DISTRIBUTIONS_FILE"
             
             # Download and process packages
             temp_dir="temp_pool/$component/$arch"
