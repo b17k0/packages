@@ -193,23 +193,26 @@ jobs:
               echo "Error: Distributions file not found after creation!"; exit 1;
             fi
             
-            # Download and process packages (temp_dir inside repo/reprepro for consistency)
+            # Download and process packages
             temp_dir="repo/reprepro/temp_pool/$component/$arch"
             mkdir -p "$temp_dir"
             
             echo "Debug: Downloading artifact $artifact_name from run $RUN_ID to $temp_dir"
             gh run download $RUN_ID -n "$artifact_name" -D "$temp_dir" || { echo "Failed to download $artifact_name, skipping"; continue; }
             
-            # Debug: list files
             echo "Debug: Contents of $temp_dir:"
             ls -la "$temp_dir"
             
-            if ls "$temp_dir"/*.deb > /dev/null 2>&1; then
-              echo "Debug: Including debs with reprepro -b repo/reprepro"
-              reprepro -b repo/reprepro includedeb $CODENAME "$temp_dir"/*.deb --component $component
-            else
+            # Check if there are .deb files
+            deb_files=("$temp_dir"/*.deb)
+            if [ ${#deb_files[@]} -eq 0 ] || [ "${deb_files[0]}" = "$temp_dir/*.deb" ]; then
               echo "No .deb files found in $temp_dir, skipping"
+              continue
             fi
+            
+            # Include debs (move --component before files)
+            echo "Debug: Including debs with command: reprepro -b repo/reprepro includedeb $CODENAME --component $component \"$temp_dir\"/*.deb"
+            reprepro -b repo/reprepro includedeb $CODENAME --component $component "$temp_dir"/*.deb
             
             rm -rf "$temp_dir"
           done
