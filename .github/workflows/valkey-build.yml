@@ -71,8 +71,6 @@ jobs:
         arch:
           - amd64
           #- arm64
-    env:
-      distro_sanitized: ${{ replace(matrix.distro, ':', '-') }}
 
     steps:
       - name: Checkout repository
@@ -94,14 +92,14 @@ jobs:
             --build-arg RELEASE_TAG=${{ needs.check-release.outputs.release_tag }} \
             --build-arg MAJOR=${{ needs.check-release.outputs.major_version }} \
             --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=./build/${{ env.distro_sanitized }}-${{ matrix.arch }} \
+            --output type=local,dest=./build/${{ matrix.distro }}-${{ matrix.arch }} \
             -f packages/valkey/Dockerfile .
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ env.distro_sanitized }}-${{ matrix.arch }}
-          path: ./build/${{ env.distro_sanitized }}-${{ matrix.arch }}/*.deb
+          name: packages-${{ matrix.distro }}-${{ matrix.arch }}
+          path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
 
   create-repo:
     needs: [check-release, build-packages]
@@ -129,23 +127,22 @@ jobs:
           ARTIFACTS_JSON=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts | jq '.artifacts | map(select(.name | startswith("packages-")))')
           
           # List of unique architectures from artifacts (for reprepro conf)
-          ARCH_LIST=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name | split("-") | .[-1]' | sort | uniq | paste -s -d ' ')
+          ARCH_LIST=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name | split("-")[2]' | sort | uniq | paste -s -d ' ')
           sed -i "s/Architectures: amd64/Architectures: $ARCH_LIST/" reprepro/conf/distributions
           
           # Loop through each artifact
           ARTIFACT_NAMES=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name')
           for artifact_name in $ARTIFACT_NAMES; do
-            # Extract distro and arch from name (e.g., packages-debian-12-amd64 -> distro=debian-12, arch=amd64)
-            arch=$(echo "$artifact_name" | awk -F'-' '{print $NF}')
-            distro=$(echo "$artifact_name" | sed "s/^packages-//; s/-${arch}$//" )
-            distro_norm=$(echo "$distro" | tr -d ':-')  # Normalize: debian-12 -> debian12, debian:12 -> debian12
+            # Extract distro and arch from name (e.g., packages-debian:12-amd64 -> distro=debian:12, arch=amd64)
+            distro=$(echo "$artifact_name" | cut -d'-' -f2)
+            arch=$(echo "$artifact_name" | cut -d'-' -f3)
             
-            echo "Downloading and processing $artifact_name (distro=$distro, arch=$arch, norm=$distro_norm)"
-            pool_dir="repo/pool/$distro_norm/$arch"  # e.g., repo/pool/debian12/amd64
+            echo "Downloading and processing $artifact_name (distro=$distro, arch=$arch)"
+            pool_dir="repo/pool/${distro//:/}/$arch"  # e.g., repo/pool/debian12/arm64
             mkdir -p "$pool_dir"
             
-            # Download artifact (corrected command)
-            gh run download -n "$artifact_name" -D "$pool_dir" || echo "Failed to download $artifact_name, skipping"
+            # Download artifact
+            gh artifact download --name "$artifact_name" --dir "$pool_dir" || echo "Failed to download $artifact_name, skipping"
             
             # Include debs in reprepro if files exist
             if ls "$pool_dir"/*.deb > /dev/null 2>&1; then
