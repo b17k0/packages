@@ -2,3 +2,7 @@
 Codename: valkey8
 Components: noble
 Architectures: amd64 arm64
+
+Codename: valkey7
+Components: noble bookworm
+Architectures: amd64 arm64

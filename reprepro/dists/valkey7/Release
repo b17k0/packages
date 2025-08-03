@@ -1,0 +1,43 @@
+Codename: valkey7
+Date: Sun, 03 Aug 2025 18:47:33 UTC
+Architectures: amd64 arm64
+Components: noble bookworm
+MD5Sum:
+ 63aa723432cb0406d2c02afcdbb4accf 2255 noble/binary-amd64/Packages
+ beecc4f155a812a78833443e85899f44 957 noble/binary-amd64/Packages.gz
+ 65654d33a557201060577533da8c38ac 37 noble/binary-amd64/Release
+ 1c8173837b59c8333efcc14ec10cba9e 2255 noble/binary-arm64/Packages
+ c0fde070dd7032ae4d2bd3139c2daeb6 956 noble/binary-arm64/Packages.gz
+ 036c1070dfdfcbc764b95212fec1b754 37 noble/binary-arm64/Release
+ 001b66cab6b09bb7718404c72cee6969 4261 bookworm/binary-amd64/Packages
+ b82c3c2d9395a60e656517890066e0c5 1457 bookworm/binary-amd64/Packages.gz
+ 6c163b6214e2bb50de5a0786f9a7cf22 40 bookworm/binary-amd64/Release
+ aa29e3edfd44036a8061d909af9de4f5 4261 bookworm/binary-arm64/Packages
+ 0638801b8890ab9b3a647349323e0e72 1456 bookworm/binary-arm64/Packages.gz
+ a8d3d4ddaf6fcb02b16160f1f42f795d 40 bookworm/binary-arm64/Release
+SHA1:
+ cba73aab3460bddbaaf499f646f79ce64dcba41c 2255 noble/binary-amd64/Packages
+ 0774138b2cdc559bf0b6efc69f7b5ef9d186a8e6 957 noble/binary-amd64/Packages.gz
+ f11f3838659bac7ad5f37de120f1504a7510efb2 37 noble/binary-amd64/Release
+ cc5eb342dc75773b569034fb78a068eb1386d630 2255 noble/binary-arm64/Packages
+ aab415040d3e4e01497849f2448d4496e868a809 956 noble/binary-arm64/Packages.gz
+ 85db0b9d42a114201f84dcf70f1bde2d3d0811c6 37 noble/binary-arm64/Release
+ bea5172088c9bee5a44cfc36c47a6bc1864f4698 4261 bookworm/binary-amd64/Packages
+ fb1bedee777be4429a7ba3216231cc2e5d299381 1457 bookworm/binary-amd64/Packages.gz
+ 6b3b59c60cf4c9221821e170eee269dec16d3f59 40 bookworm/binary-amd64/Release
+ 6da04c68dfe9d3db47c8a30ea32fedb94f97ae4d 4261 bookworm/binary-arm64/Packages
+ f72339cd7dbacc0e522d4ba5069bd769f1a7a7c5 1456 bookworm/binary-arm64/Packages.gz
+ 3d78c99f463787263d9fbeccf0eef5d8347a26d8 40 bookworm/binary-arm64/Release
+SHA256:
+ f544e00ea8573c0c9107b39e30235f4c1c27184a841bd7806e5678dc3e9b6fd0 2255 noble/binary-amd64/Packages
+ b0aa21707e37c62e9b145fcfc05549cdeec19c6823f6dfc94da4b712043d0f58 957 noble/binary-amd64/Packages.gz
+ bfe2a26d2db25b2aea73720007ebcc30be5210acc2b3271e08f2a4742f255ebb 37 noble/binary-amd64/Release
+ 2c34d6c1fe49f4b393194a830127f619b547190bad21cda2d99f31599b3dfd78 2255 noble/binary-arm64/Packages
+ b55d496c05fb0541d3104c3ab793cb4cf259058ab3c2f84b74479dfa38c0d9c2 956 noble/binary-arm64/Packages.gz
+ ca01b2d77119265575f9878e759d9488a7b8dfc824685aaf7f9be713ff9b333a 37 noble/binary-arm64/Release
+ 0333db40b16cc2ccc2e3cd7241c9aa5c543c01b6a95e0c293bff5b5ff7a77d4c 4261 bookworm/binary-amd64/Packages
+ d18590a7a169d7d7e174d52c8af2aec56f334a67425eb6d38e24f6ec0c5bb223 1457 bookworm/binary-amd64/Packages.gz
+ dc8211d519da780ef11267b2bafd6de38891d1341dba76eaa46291821fdcb646 40 bookworm/binary-amd64/Release
+ db19488d920e5f2e2bda322e6ea3cec2b958e3efe100a8e71d6d3de6ae4eda21 4261 bookworm/binary-arm64/Packages
+ 5264fa918e648d9a97be6371670e5ba28645abf6109b48fcd102c57df362e252 1456 bookworm/binary-arm64/Packages.gz
+ 7adffa85a605b2da34fc7e4ca5699fe3d35102e70b6f5cb7e172f9b9ad850b95 40 bookworm/binary-arm64/Release
