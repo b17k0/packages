@@ -98,8 +98,8 @@ jobs:
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ matrix.distro }}-${{ matrix.arch }}
-          path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
+          name: packages-${{ replace(matrix.distro, ':', '') }}-${{ matrix.arch }}  # ЗМІНА: Нормалізуємо ім'я, замінюючи ":" на "" (e.g., "packages-debian12-amd64")
+          path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb  # Шлях залишається з ":", бо в FS це ок
 
   create-repo:
     needs: [check-release, build-packages]
