@@ -69,12 +69,12 @@ jobs:
       matrix:
         arch: 
           - amd64
-          # - arm64
+          - arm64
         include:
           - image: debian:12
             codename: bookworm
-          # - image: ubuntu:24.04
-          #   codename: noble
+          - image: ubuntu:24.04
+            codename: noble
 
     steps:
       - name: Checkout repository
