@@ -98,7 +98,7 @@ jobs:
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ replace(matrix.distro, ':', '') }}-${{ matrix.arch }}
+          name: packages-${{ matrix.distro }}-${{ matrix.arch }}
           path: ./build/${{ matrix.distro }}-${{ matrix.arch }}/*.deb
 
   create-repo:
@@ -110,6 +110,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout existing gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: repo
+        continue-on-error: true
+
       - name: Set up reprepro and tools
         run: |
           sudo apt update
@@ -118,7 +125,12 @@ jobs:
       - name: Download and include packages using GitHub API (automatic, no hard-coded lists)
         run: |
           CODENAME="valkey${{ needs.check-release.outputs.major_version }}"
-          sed -i "s/Codename: stable/Codename: $CODENAME/" reprepro/conf/distributions
+          mkdir -p repo/reprepro/conf
+          if [ ! -f repo/reprepro/conf/distributions ]; then
+            cp reprepro/conf/distributions repo/reprepro/conf/distributions 2>/dev/null || \
+              echo -e "Codename: stable\nComponents: main\nArchitectures: amd64" > repo/reprepro/conf/distributions
+          fi
+          sed -i "s/Codename: .*/Codename: $CODENAME/" repo/reprepro/conf/distributions
           
           # Get current workflow run ID
           RUN_ID=${{ github.run_id }}
@@ -128,7 +140,7 @@ jobs:
           
           # List of unique architectures from artifacts (for reprepro conf)
           ARCH_LIST=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name | split("-")[2]' | sort | uniq | paste -s -d ' ')
-          sed -i "s/Architectures: amd64/Architectures: $ARCH_LIST/" reprepro/conf/distributions
+          sed -i "s/^Architectures: .*/Architectures: $ARCH_LIST/" repo/reprepro/conf/distributions
           
           # Loop through each artifact
           ARTIFACT_NAMES=$(echo "$ARTIFACTS_JSON" | jq -r '.[].name')
@@ -159,5 +171,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./repo
           publish_branch: gh-pages
-          force_orphan: true
+          keep_files: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }} in $CODENAME"
