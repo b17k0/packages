@@ -5,44 +5,44 @@ Origin: Valkey APT Repository
 Label: Valkey
 Suite: stable
 Codename: valkey7
-Date: Sun, 10 Aug 2025 13:39:12 UTC
+Date: Sun, 10 Aug 2025 14:59:51 UTC
 Architectures: amd64
 Components: bookworm noble
 Description: Valkey APT Repository
 MD5Sum:
- d8c9afa368d35a6e511c978e628ac474 4261 bookworm/binary-amd64/Packages
- f6d82d92f687e354ba6d15205f94074e 1462 bookworm/binary-amd64/Packages.gz
+ 47d3ed97afd02d18f7048fa95d571303 4261 bookworm/binary-amd64/Packages
+ a6b4707596b410262915586d972435ac 1459 bookworm/binary-amd64/Packages.gz
  a1c13f9242c552acf95a9a87229e6cda 135 bookworm/binary-amd64/Release
- 669dbe3284289a68d917dce23b1eef8f 2255 noble/binary-amd64/Packages
- d21ffe64de56dff4bd8516ebc74cb2ba 958 noble/binary-amd64/Packages.gz
+ a0f1d29fd137d1e4906d9eb770e6c561 2255 noble/binary-amd64/Packages
+ 99a53c8def4697260c80e545d393b06a 958 noble/binary-amd64/Packages.gz
  1bbe7d11c7a7769bb039ea9bff2bce80 132 noble/binary-amd64/Release
 SHA1:
- 863300f47570c6cfe2c6863f2d0ae7120fc094fd 4261 bookworm/binary-amd64/Packages
- 9eba8a0f407b76a11d627b0f577ae1c8d508ae98 1462 bookworm/binary-amd64/Packages.gz
+ 5e874446db7943b6f0fbe690c13a0941143de3bc 4261 bookworm/binary-amd64/Packages
+ 1e4ae86f57fa8cc6a5493392e5734153802c0e92 1459 bookworm/binary-amd64/Packages.gz
  a32745d0ea83de2d4aeb4e859957214fc8014477 135 bookworm/binary-amd64/Release
- 4f0586144d7664b4d5e9b228421f007fd7423e5e 2255 noble/binary-amd64/Packages
- 983a97c4927f375cf51499b3f0bf2be588b2553c 958 noble/binary-amd64/Packages.gz
+ f7af914df3f7b60b6159cc480bd3b72a51213932 2255 noble/binary-amd64/Packages
+ 48e91dce77a1dee529db9b39d38c9ed693358411 958 noble/binary-amd64/Packages.gz
  ca1a13ad27fa613f20575275317776c122650887 132 noble/binary-amd64/Release
 SHA256:
- 4d73b38491dd75ffd377c06ac755239206b68f3fd046d326a6961104af55cbc4 4261 bookworm/binary-amd64/Packages
- 4700ff9e515c3979aaefedaebb570b533e64b6caf10c5443479a268de3b53c07 1462 bookworm/binary-amd64/Packages.gz
+ dce03888bbcbd9a585ce82538691d296b3a897a2a793893873b8c6e63d56c87a 4261 bookworm/binary-amd64/Packages
+ 7c3e2d92f6ff904373d8c0469b406bd0561300c2d9386f1fd10de36596a7e34e 1459 bookworm/binary-amd64/Packages.gz
  09e8bb5d4c84c9fd00c09ec06b81c1fd1cdef74e91ea153fb3302f0c3b374306 135 bookworm/binary-amd64/Release
- 8a4d403a3d17d7957dc112c6124f7ab0f9127ebdeef6c7a08f50d8f6e545c690 2255 noble/binary-amd64/Packages
- b23be38d392231221ab06b2a6a422d8667599eae988586596ed64c4428045a6d 958 noble/binary-amd64/Packages.gz
+ 6600cb796e79c9636247162ac105f90fc2a62b2adb194fab7f7bd921e63987d0 2255 noble/binary-amd64/Packages
+ 6a2d653f04f6b616dc53c409478d13d89d26e1fcfc2b75ea4eede02278f0f4d0 958 noble/binary-amd64/Packages.gz
  c82944b0ae0b68acd218ecc1bd1304684f3501707c565937b54ba5dd46c77b7d 132 noble/binary-amd64/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEEwJ+CPsjAo0hCVYe+3GVmq8LSOsUFAmiYoQAACgkQ3GVmq8LS
-OsXrpw//UTF6aeb0XIskCU4ZVkOfrEU8hnifrvirgVnoL9kV2HbVmU7qQbN20CEg
-MAnkum9yqgXm3wun0gdEfVhYw46uqGZtNpKqqzf1YyIfcMNs4+gYuZ8vHBIcEt94
-QUNbXDmg8Pd+BgczvMuA/Ud7ACk1y68nqBrVYhEtnkQMRykDN0w3pT0dYh3qbUOu
-SEDwMSE4VUBdWFClldnk46TaQXNWrtb5r9jt7EEZjiopC/3g+0a1xljslb6s8VPY
-53OLycu12Yvu+dmtqVsmWx/xIY4hJ4SG1G9NXHboYiHqaa4VT+px6zMHmB0eAoxj
-jTeekQNLZe+Olf+v3aZB1/oUo/p7UVLQDPtM3oGqbfKed0w4BiiYy2CfG32Uwq0X
-AsZd8VDO4mxpxm8pYsxIaE6xq0b+UCNDnZtpPJoBc72AECfwEUuROFJJczvvh8q3
-hnNj4zIFj9jQeBaSlZ7pH4CVLOfpqI5UyEoWfPmKvmZi7iitKlWDtKRy8bnxA2ks
-EeBUL7EEEwJa0Fysu/dPyN/G7hdyOrTMctrHqj8s36RjiaXDVd4lCQoKhz6sOTJ5
-LBvw36n/HZcH6y/B1WrguyGhMYdvf60YpWosNO0SO1qRXezEL7T+hT+xc0nHVmeH
-rB0AzppyuGVaUwo5rfSPR6GPPTpYLMV9mwTmoWLH6wG5+tH+B3M=
-=Sdxf
+iQIzBAEBCgAdFiEEwJ+CPsjAo0hCVYe+3GVmq8LSOsUFAmiYs+cACgkQ3GVmq8LS
+OsUIYw//ZWSTvIMX+6vIBqt5Spdp+yb47TlGKma8RyvZcSYSVuO1eS0MhjdiWS7y
+68S5nPDIWc6SKUFX1+jAh0OJ29phpAsgn9Kdm0U/RV7ovApC8ltUzlD9xBC+xQea
+BowEoroOSBkkPKYpmraCPuem5Pf2CqW+WCm0FpXY2aOiMwKD8dqq8EuBtozEtcyx
+IoZji1Tbi+aEJt08e8dPySAHk0AaJCjXd2PuhUqa761xEeNA3Zsm5qbGy+o0hoHi
+oWyL1j2ifRpuFe2jSi4DqdljvHs9n7gg40ugHu7u4kSXHVno3Whp0kO9HdXdlD0n
+JG3RsMELZz3kAlk9XYhjzexkzMgKkEnzcqt11HMm9VR9JrCotgonVhR/ff8wGCUe
+YItoU/JOu9XNG6OBV4ZFUPHB62p6hN9Q9me8Hz9+1PU3EzVbrIH2Zxz/jGw2c5l/
+8muzJq9di3SRy/+/k3zi23oMDLm+oOyV65ENzcvj82oPvy7ubQMa7+1KGrtYglzb
+SV6DXP3dgj1gJdjDxJ5bUPhS+H/9jjeXEn7fvTloD04CX0fdpLlCyhbscpiMyVVu
+6JFfhKAGavY4irkXPYL0h2nQiOckXshvE+LBY4YuiLKwqZ29TRyG2MLex+bl7vnG
+DBdRB7hhG4VFemJJfVOdOo0TLcQEC2boL57h12iam4JJlbo7udM=
+=+XRE
 -----END PGP SIGNATURE-----

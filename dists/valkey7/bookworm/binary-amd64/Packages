@@ -9,10 +9,10 @@ Homepage: https://valkey.io
 Priority: optional
 Section: database
 Filename: pool/bookworm/v/valkey/valkey-sentinel_7.2.10-1~bookworm_amd64.deb
-Size: 1124296
-SHA256: 156249d70346bd0f3f36a581592b504932a642742d63dc48d7de36b06c333ee1
-SHA1: 8899ff82bca459431dc3f88df01933fb70e85c4a
-MD5sum: b81d4838cf32b933d9bc643337e458e2
+Size: 1124596
+SHA256: 18606a4ded52d58f56d21bad1bbfa6b7ecb656f91e5b423dbd2e87954bc90101
+SHA1: bb77883d34748f3aa729d2305a56e4fdb858b553
+MD5sum: 8d5951363d606e5049eb56eaf1fb6a4d
 Description: Persistent key-value database with network interface (sentinel)
  Valkey Sentinel provides high availability for Valkey. It monitors Valkey
  instances and automatically performs failover.
@@ -29,11 +29,11 @@ Priority: optional
 Section: debug
 Filename: pool/bookworm/v/valkey/valkey-sentinel-dbgsym_7.2.10-1~bookworm_amd64.deb
 Size: 3809308
-SHA256: d143571d59781a96cdd6c019facb5917b10186e1e3f977fe1460e7b0784b06a5
-SHA1: 156c5c3d64a4fa8803f34dac3b1a2ac4a46e1262
-MD5sum: 545632b6599723bd14b7f379f7ed9703
+SHA256: 8e0baa7331e04cc5503215e3a6cd889f4b013f06fd55ccbb09189140166e1d4e
+SHA1: ea2cd10984f1ab32ae72e42d1d0e37166b9ca04d
+MD5sum: 5ed26efe83f2becf9b1f52ce1d5dcaa8
 Description: debug symbols for valkey-sentinel
-Build-Ids: 59636e4faac513b8ce9d486abb25ee1cc4a2bdb6
+Build-Ids: a4a3db122d40d6845e676058983bd94f2841344d
 
 Package: valkey-server
 Source: valkey
@@ -47,10 +47,10 @@ Homepage: https://valkey.io
 Priority: optional
 Section: database
 Filename: pool/bookworm/v/valkey/valkey-server_7.2.10-1~bookworm_amd64.deb
-Size: 1150628
-SHA256: 9fef264b7d633714a555565ef0e1a352372880417e68dbf369720e9c0f87dd2f
-SHA1: 6e37f5a959f0f0d7efbf7394f5486d19ab04a989
-MD5sum: 17f8b91ab0eb89df93244e3556cfd5ad
+Size: 1150784
+SHA256: a4c99a7719a6af57109a5394f06ab27e5128b385eee29f62b4f998c1551d1909
+SHA1: da20142d258e6c39f4b026d65aabb96851308c1e
+MD5sum: 63cb8c69752303764054e32dc007d96c
 Description: Persistent key-value database with network interface (server)
  Valkey is an advanced key-value store. It is often referred to as a data
  structure server since keys can contain strings, hashes, lists, sets and
@@ -69,12 +69,12 @@ Depends: valkey-server (= 7.2.10-1~bookworm)
 Priority: optional
 Section: debug
 Filename: pool/bookworm/v/valkey/valkey-server-dbgsym_7.2.10-1~bookworm_amd64.deb
-Size: 3809312
-SHA256: a23d0c0800f5d9df834dd89028fdb935bbeb6d6b5e43f9015cc5c6b56a5e028f
-SHA1: 39219ac0ef7c7ef2705fea6780f66db90d240357
-MD5sum: 25998e73d27ba1c9ed4ad6600940becc
+Size: 3809308
+SHA256: 20f6ca095d8581008a20717b8aa47b3ef5a194b555006a5b593cfd565c970385
+SHA1: 8be151d32a6e4e8d91502ba2959ccb3601065494
+MD5sum: ce9dd8fc50b89419517eb9c07af4b69e
 Description: debug symbols for valkey-server
-Build-Ids: 59636e4faac513b8ce9d486abb25ee1cc4a2bdb6
+Build-Ids: a4a3db122d40d6845e676058983bd94f2841344d
 
 Package: valkey-tools
 Source: valkey
@@ -88,10 +88,10 @@ Homepage: https://valkey.io
 Priority: optional
 Section: database
 Filename: pool/bookworm/v/valkey/valkey-tools_7.2.10-1~bookworm_amd64.deb
-Size: 1416220
-SHA256: b470a563b6d218e370f26f6648521d87f7aa2d4c9ff16bbe762f2deca40d6ace
-SHA1: 82f57e3ac8199a4a80af994354aed8b49366d1db
-MD5sum: 15e375fd80596d1a9f954abbed692339
+Size: 1416228
+SHA256: ece255dfaea8b82666359de0934557106a0383701a6edb80b9ea9dfdc24dab54
+SHA1: e32a0543273cead37b41436db273757c3d813ade
+MD5sum: 9083635389463893770fb3b0531d8ee7
 Description: Persistent key-value database with network interface (client tools)
  This package contains supporting administrative tools: valkey-cli,
  valkey-benchmark, and valkey-check-aof.
@@ -107,10 +107,10 @@ Depends: valkey-tools (= 7.2.10-1~bookworm)
 Priority: optional
 Section: debug
 Filename: pool/bookworm/v/valkey/valkey-tools-dbgsym_7.2.10-1~bookworm_amd64.deb
-Size: 7083212
-SHA256: ebce9317315b8025b912b97e9a7bf4af681051ee3dbd2533a24d6386f9706d70
-SHA1: 01b9a0dc6a576b3cef4ec43b22c9ea146faaf13d
-MD5sum: d93e569da974c301efa13ad220b914b5
+Size: 7083248
+SHA256: 245401747a63e4f18fc4a7713f321dbcee2b17968939bf784c396aea266f7478
+SHA1: a86ba6d8078c9991f19b61cbdc2335a881bfb0d1
+MD5sum: 4b53deb1bb74ccfe6a808e9963d9535b
 Description: debug symbols for valkey-tools
-Build-Ids: 0830e9098f069783314e3f71c6d0ed40b5231f2e 59636e4faac513b8ce9d486abb25ee1cc4a2bdb6 a397b43367bf674a1578b4544e56fe429252719a
+Build-Ids: 8e044d896c26f378575a3d69212548a105eb9ebd a4a3db122d40d6845e676058983bd94f2841344d c6a744dbda5fe62261c53d0a3d319ee15747e80f
 
