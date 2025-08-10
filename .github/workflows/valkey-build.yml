@@ -139,7 +139,9 @@ jobs:
         with:
           pattern: packages-*
           path: ./downloaded-artifacts
-          merge-multiple: true
+          
+      - name: Debug: List downloaded artifacts
+        run: ls -R ./downloaded-artifacts
 
       - name: Include packages dynamically
         run: |
@@ -198,3 +200,4 @@ jobs:
           keep_files: true
           force_orphan: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
+
