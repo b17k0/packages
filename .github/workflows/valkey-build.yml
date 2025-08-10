@@ -139,8 +139,8 @@ jobs:
         with:
           pattern: packages-*
           path: ./downloaded-artifacts
-          
-      - name: Debug: List downloaded artifacts
+
+      - name: List downloaded artifacts
         run: ls -R ./downloaded-artifacts
 
       - name: Include packages dynamically
@@ -160,6 +160,8 @@ jobs:
             artifact_name=$(basename "$artifact_dir")
             component=$(echo "$artifact_name" | cut -d'-' -f2)
             arch=$(echo "$artifact_name" | cut -d'-' -f3)
+            
+            echo "Processing: component=$component, arch=$arch, dir=$artifact_dir"
             
             # Add or update section in distributions
             if ! grep -q "Codename: $CODENAME" "$DISTRIBUTIONS_FILE"; then
@@ -185,11 +187,13 @@ jobs:
               continue
             fi
             
+            echo "Including ${#deb_files[@]} debs into $CODENAME/$component"
             reprepro -b repo/reprepro --component $component includedeb $CODENAME "$artifact_dir"/*.deb
           done
           
           # Export the distribution
           reprepro -b repo/reprepro export $CODENAME
+          echo "Export completed for $CODENAME"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
