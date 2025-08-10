@@ -238,8 +238,11 @@ jobs:
       - name: Generate Directory Listings
         uses: gacts/directory-listing@v1.0.0
         with:
-          path: ./repo
+          target: ./repo
           overwrite: true
+          ignore: |
+            CNAME
+            **/index.html
 
       - name: Debug Generated Listings
         run: |
