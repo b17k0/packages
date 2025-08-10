@@ -1,0 +1,9 @@
+
+Origin: Valkey APT Repository
+Label: Valkey
+Suite: stable
+Codename: valkey8
+Components: bookworm noble
+Architectures: amd64
+Description: Valkey APT Repository
+SignWith: C09F823EC8C0A348425587BEDC6566ABC2D23AC5

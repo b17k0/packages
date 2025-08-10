@@ -1,0 +1,116 @@
+Package: valkey-sentinel
+Source: valkey
+Version: 8.1.3-1~bookworm
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 3889
+Depends: valkey-tools (= 8.1.3-1~bookworm)
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/bookworm/v/valkey/valkey-sentinel_8.1.3-1~bookworm_amd64.deb
+Size: 1310224
+SHA256: 0b402d591ac7c9de81baf6fd31cad32877d0d42f64316da2d88828040efd49ba
+SHA1: 9243a3ed5ec481f46b8c7bdb36e4f2d399ab538f
+MD5sum: d7c58be77cb84acba00070d31ff6358e
+Description: Persistent key-value database with network interface (sentinel)
+ Valkey Sentinel provides high availability for Valkey. It monitors Valkey
+ instances and automatically performs failover.
+
+Package: valkey-sentinel-dbgsym
+Source: valkey
+Version: 8.1.3-1~bookworm
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 5209
+Depends: valkey-sentinel (= 8.1.3-1~bookworm)
+Priority: optional
+Section: debug
+Filename: pool/bookworm/v/valkey/valkey-sentinel-dbgsym_8.1.3-1~bookworm_amd64.deb
+Size: 4805440
+SHA256: 1b63db9dc4a269330c8cb34eb58dda3b7a4afd13c49919397b424e6b59471a42
+SHA1: 5f80d19cbb78aca548bf18733d78c455a93c9919
+MD5sum: ee071d9ffd61593a07e5be66f65a592e
+Description: debug symbols for valkey-sentinel
+Build-Ids: 2b18d256e3f0aef7986c4221df3601a57e3cce6a
+
+Package: valkey-server
+Source: valkey
+Version: 8.1.3-1~bookworm
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 4001
+Depends: valkey-tools (= 8.1.3-1~bookworm)
+Recommends: logrotate
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/bookworm/v/valkey/valkey-server_8.1.3-1~bookworm_amd64.deb
+Size: 1339576
+SHA256: b22265dc02e4ed092cd0f33393814764dc0ac10cf7a4181c95a664cfa03afa50
+SHA1: 746949dbc0bdfa52895cb753313fe6288d58b807
+MD5sum: b4fcd0eefa8ff84ebb79266288c13404
+Description: Persistent key-value database with network interface (server)
+ Valkey is an advanced key-value store. It is often referred to as a data
+ structure server since keys can contain strings, hashes, lists, sets and
+ sorted sets.
+ .
+ This package contains the Valkey server.
+
+Package: valkey-server-dbgsym
+Source: valkey
+Version: 8.1.3-1~bookworm
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 5209
+Depends: valkey-server (= 8.1.3-1~bookworm)
+Priority: optional
+Section: debug
+Filename: pool/bookworm/v/valkey/valkey-server-dbgsym_8.1.3-1~bookworm_amd64.deb
+Size: 4805436
+SHA256: b3c2d8ce56b87128cbd95931142cce28d05a48f3224b25ebb399012519002faf
+SHA1: 37de6e495d0708bb21a780167282327dd686f45f
+MD5sum: a81d9faaf330371f06f6cf00dddddbd0
+Description: debug symbols for valkey-server
+Build-Ids: 2b18d256e3f0aef7986c4221df3601a57e3cce6a
+
+Package: valkey-tools
+Source: valkey
+Version: 8.1.3-1~bookworm
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 9977
+Depends: adduser, libc6 (>= 2.34), libssl3 (>= 3.0.0), libsystemd0
+Suggests: ruby-redis
+Homepage: https://valkey.io
+Priority: optional
+Section: database
+Filename: pool/bookworm/v/valkey/valkey-tools_8.1.3-1~bookworm_amd64.deb
+Size: 1553096
+SHA256: 6332718fde239a8bb864eda35326ed840fb0725abef45d5aa0c296f3609b07f5
+SHA1: ed724a65c3263902936d3a37dcf9b768966826cc
+MD5sum: a4d34f53164b49514ad4c231c796f759
+Description: Persistent key-value database with network interface (client tools)
+ This package contains supporting administrative tools: valkey-cli,
+ valkey-benchmark, and valkey-check-aof.
+
+Package: valkey-tools-dbgsym
+Source: valkey
+Version: 8.1.3-1~bookworm
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Oleksandr Bilko <packages@bil.co.ua>
+Installed-Size: 8839
+Depends: valkey-tools (= 8.1.3-1~bookworm)
+Priority: optional
+Section: debug
+Filename: pool/bookworm/v/valkey/valkey-tools-dbgsym_8.1.3-1~bookworm_amd64.deb
+Size: 8198184
+SHA256: 1dcfd1c3b496f70e6e7a543ee4842f1578873809584e94406f05c05895ffca57
+SHA1: af73eb204b256e8fd2c8f27071331a192aff083d
+MD5sum: b9aea8ac3e7e10a0bb4da89331db1da3
+Description: debug symbols for valkey-tools
+Build-Ids: 2b18d256e3f0aef7986c4221df3601a57e3cce6a 2d3f7d3a04c8d0e866592796cd46663f7e939b3c ed32d33d0cd4f1e0ff13593ec141155ad35f28c9
+

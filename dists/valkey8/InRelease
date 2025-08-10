@@ -1,0 +1,48 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: Valkey APT Repository
+Label: Valkey
+Suite: stable
+Codename: valkey8
+Date: Sun, 10 Aug 2025 13:28:29 UTC
+Architectures: amd64
+Components: bookworm noble
+Description: Valkey APT Repository
+MD5Sum:
+ 7bb041084c1e67cd472995110cbe03e8 4244 bookworm/binary-amd64/Packages
+ e72457901da793478424ec20d4bac3cb 1460 bookworm/binary-amd64/Packages.gz
+ a1c13f9242c552acf95a9a87229e6cda 135 bookworm/binary-amd64/Release
+ b3314cf8137abbce6aa331a9a613ba2f 2248 noble/binary-amd64/Packages
+ d0d13eeb8cb957d4647eb7348ed7cd7a 961 noble/binary-amd64/Packages.gz
+ 1bbe7d11c7a7769bb039ea9bff2bce80 132 noble/binary-amd64/Release
+SHA1:
+ a3cd0677ca7e664865e2c0fc62a2b27432bf88e8 4244 bookworm/binary-amd64/Packages
+ 6e61ac5f4424b9ddef9a82689c013569a2675078 1460 bookworm/binary-amd64/Packages.gz
+ a32745d0ea83de2d4aeb4e859957214fc8014477 135 bookworm/binary-amd64/Release
+ be17f55fada2f41163c60fcf03f656b9fb8e91e4 2248 noble/binary-amd64/Packages
+ fb4905323621256d0dd55db2775d0c66183cdbf0 961 noble/binary-amd64/Packages.gz
+ ca1a13ad27fa613f20575275317776c122650887 132 noble/binary-amd64/Release
+SHA256:
+ 6d7c96ce617756a0ba78d7c3591a65881c79d15c24a1af88550852fba7fbab4d 4244 bookworm/binary-amd64/Packages
+ 3236ccd2396481b296d1aeaf28cb8577ebf98f85f1027f8122149c7f4dfb1a89 1460 bookworm/binary-amd64/Packages.gz
+ 09e8bb5d4c84c9fd00c09ec06b81c1fd1cdef74e91ea153fb3302f0c3b374306 135 bookworm/binary-amd64/Release
+ ef52379dfe86cbaf15169a8f76c865432a2e0ec301b70d2ef64bd00959db9cc8 2248 noble/binary-amd64/Packages
+ 9595e8c9fe132b3f3807eae8cfe86ef2a48c426f8f813067b16b03d78938ec6f 961 noble/binary-amd64/Packages.gz
+ c82944b0ae0b68acd218ecc1bd1304684f3501707c565937b54ba5dd46c77b7d 132 noble/binary-amd64/Release
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEwJ+CPsjAo0hCVYe+3GVmq8LSOsUFAmiYnn0ACgkQ3GVmq8LS
+OsXoGg//UBNlhqJO97EFp7cBTysnqBvLpB2D1u6bFaRzyjG2jc8uN4u3ZZ7mATYR
+cte/trwcmKkA/xvHByf5I8x5IVYAdvNb6qiHrwecM6hi4mQ5NvgAhMFdE97fdJp8
+Punjo7sS0RHP69qXtMc/F5Dw4l6M2hhot6vTwziM98Bo3VliMTQrijyyFn2vNET2
+bEuyzhbNJRTyYcMWnI+AOSNntHpP2Tu8d9QyNznPeq6rZTzyuIyk2OM0oKjN7Srw
+TWraONNSWDfJrM+6vQjA549MiqZ1x6OfYI8CPlQce6r37hb6SwGQ8QS+YPwnklcx
+RgD0Cc/fv4Hw8WHA393wq3YCPblsAoH/Kc6njYZ6oLKaYsSIAqtbh+XIEpM3385z
+1DIaIUSF3JJbISUR6nRnMhBqMAKHhG/1qpqiJTB4p/BI7np1wLRVhtfDWpZQZCcm
+5kZCdXHr09J0QmT11xQHEVWf+EiJkaYD63zV9bFMhNMZ7A8kBcBrmd7l8kVmjS3y
+Y1NP2W/2hncG5hR1JDDKGyJYFNmBZsFymDo52Xtu557BXgxAcvNcKwZid2W2cOmS
+rEgD1uT/8dRSUdRV1HjxonX8tGJ8aVIW1+h2qj8DV6VRfuoi/W1jbgNXxFNom2zd
+BHhUEz69oFCfhZ47NMes+oKBA0QKCbI4Zyic0SFS7nNEY3EM0WQ=
+=GUbS
+-----END PGP SIGNATURE-----
