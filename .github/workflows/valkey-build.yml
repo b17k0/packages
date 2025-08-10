@@ -10,6 +10,10 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-release:
     runs-on: ubuntu-latest
@@ -22,42 +26,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get last processed release
-        id: last
+      - name: Fetch and check release
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -f last_release.txt ]; then
             LAST_RELEASE=$(cat last_release.txt)
           else
             LAST_RELEASE="none"
           fi
-          echo "LAST_RELEASE=$LAST_RELEASE" >> $GITHUB_ENV
-
-      - name: Fetch latest Valkey release
-        id: fetch
-        run: |
-          LATEST_TAG=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          
+          LATEST_TAG=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             https://api.github.com/repos/valkey-io/valkey/releases/latest | jq -r '.tag_name')
           if [ -z "$LATEST_TAG" ]; then echo "Error: Failed to fetch latest tag"; exit 1; fi
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-
-      - name: Override with custom tag if provided
-        if: github.event.inputs.release_tag != ''
-        run: |
-          echo "LATEST_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_ENV
-
-      - name: Check if new release and parse major version
-        id: check
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          
+          if [ "${{ github.event.inputs.release_tag }}" != '' ]; then
+            LATEST_TAG="${{ github.event.inputs.release_tag }}"
+          fi
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] || [ "$LATEST_TAG" != "$LAST_RELEASE" ]; then
             echo "new_release=true" >> $GITHUB_OUTPUT
-          elif [ "${{ env.LATEST_TAG }}" != "${{ env.LAST_RELEASE }}" ]; then
-            echo "new_release=true" >> $GITHUB_OUTPUT
-            echo "${{ env.LATEST_TAG }}" > last_release.txt
+            echo "$LATEST_TAG" > last_release.txt
           else
             echo "new_release=false" >> $GITHUB_OUTPUT
           fi
-          echo "release_tag=${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
-          MAJOR=$(echo "${{ env.LATEST_TAG }}" | cut -d'.' -f1)
+          
+          echo "release_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          MAJOR=$(echo "$LATEST_TAG" | cut -d'.' -f1)
           if [ -z "$MAJOR" ]; then echo "Error: Invalid major version"; exit 1; fi
           echo "major_version=$MAJOR" >> $GITHUB_OUTPUT
 
@@ -65,7 +61,7 @@ jobs:
         if: github.event_name == 'schedule' && steps.check.outputs.new_release == 'true'
         uses: EndBug/add-and-commit@v9
         with:
-          message: "Update last processed release to ${{ env.LATEST_TAG }}"
+          message: "Update last processed release to ${{ steps.check.outputs.release_tag }}"
           add: last_release.txt
 
   build-packages:
@@ -93,18 +89,23 @@ jobs:
           if [ ! -f debian/changelog ]; then echo "Changelog not found!"; exit 1; fi
           sed -i "1s/^.*$/valkey (${{ needs.check-release.outputs.release_tag }}-1~${{ matrix.os.codename }}) ${{ matrix.os.codename }}; urgency=medium/" debian/changelog
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build deb packages in Docker
-        run: |
-          docker buildx build --platform linux/${{ matrix.arch }} \
-            --build-arg DISTRO=${{ matrix.os.image }} \
-            --build-arg RELEASE_TAG=${{ needs.check-release.outputs.release_tag }} \
-            --build-arg MAJOR=${{ needs.check-release.outputs.major_version }} \
-            --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=./build/${{ matrix.os.codename }}-${{ matrix.arch }} \
-            -f packages/valkey/Dockerfile .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: packages/valkey/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          build-args: |
+            DISTRO=${{ matrix.os.image }}
+            RELEASE_TAG=${{ needs.check-release.outputs.release_tag }}
+            MAJOR=${{ needs.check-release.outputs.major_version }}
+            ARCH=${{ matrix.arch }}
+          outputs: type=local,dest=./build/${{ matrix.os.codename }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
@@ -133,9 +134,14 @@ jobs:
           sudo apt update
           sudo apt install -y reprepro gh jq
 
-      - name: Download and include packages dynamically
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Download all packages artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: ./downloaded-artifacts
+          merge-multiple: true
+
+      - name: Include packages dynamically
         run: |
           MAJOR="${{ needs.check-release.outputs.major_version }}"
           CODENAME="valkey$MAJOR"
@@ -145,39 +151,15 @@ jobs:
             touch "$DISTRIBUTIONS_FILE"
           fi
           
-          echo "Debug: Structure of repo directory:"
-          ls -la repo
-          echo "Debug: Structure of repo/reprepro:"
-          ls -la repo/reprepro || echo "repo/reprepro not found yet"
-          echo "Debug: Structure of repo/reprepro/conf:"
-          ls -la repo/reprepro/conf || echo "repo/reprepro/conf not found yet"
-          
-          # Get current workflow run ID
-          RUN_ID=${{ github.run_id }}
-          
-          # Get list of artifact names via GitHub API (only names, minimal jq)
-          RAW_JSON=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts)
-          echo "Debug: Raw API response: $RAW_JSON"
-          
-          ARTIFACT_NAMES=$(echo "$RAW_JSON" | jq -r '.artifacts[].name | select(startswith("packages-"))')
-          
-          if [ -z "$ARTIFACT_NAMES" ]; then
-            echo "Error: No packages artifacts found!"; exit 1;
-          fi
-          
-          echo "Debug: Artifact names: $ARTIFACT_NAMES"
-          
-          # Loop through each artifact name
-          echo "$ARTIFACT_NAMES" | while read -r artifact_name; do
-            if [ -z "$artifact_name" ]; then continue; fi
+          # Process each downloaded artifact directory
+          for artifact_dir in ./downloaded-artifacts/*; do
+            if [ ! -d "$artifact_dir" ]; then continue; fi
             
-            # Extract codename and arch from name (e.g., packages-bookworm-amd64 -> codename=bookworm, arch=amd64)
+            artifact_name=$(basename "$artifact_dir")
             component=$(echo "$artifact_name" | cut -d'-' -f2)
             arch=$(echo "$artifact_name" | cut -d'-' -f3)
             
-            echo "Processing $artifact_name (CODENAME=$CODENAME, component=$component, arch=$arch)"
-            
-            # Add or update section in distributions if not exists
+            # Add or update section in distributions
             if ! grep -q "Codename: $CODENAME" "$DISTRIBUTIONS_FILE"; then
               echo -e "\nCodename: $CODENAME\nComponents: $component\nArchitectures: $arch" >> "$DISTRIBUTIONS_FILE"
             else
@@ -194,49 +176,18 @@ jobs:
               fi
             fi
             
-            echo "Debug: Distributions file path: $DISTRIBUTIONS_FILE"
-            if [ -f "$DISTRIBUTIONS_FILE" ]; then
-              echo "Debug: Current distributions file exists and contains:"
-              cat "$DISTRIBUTIONS_FILE"
-            else
-              echo "Error: Distributions file not found after creation!"; exit 1;
-            fi
-            
-            # Download and process packages
-            temp_dir="repo/reprepro/temp_pool/$component/$arch"
-            mkdir -p "$temp_dir"
-            
-            echo "Debug: Downloading artifact $artifact_name from run $RUN_ID to $temp_dir"
-            gh run download $RUN_ID -n "$artifact_name" -D "$temp_dir" || { echo "Failed to download $artifact_name, skipping"; continue; }
-            
-            echo "Debug: Contents of $temp_dir:"
-            ls -la "$temp_dir"
-            
-            # Check if there are .deb files
-            deb_files=("$temp_dir"/*.deb)
-            if [ ${#deb_files[@]} -eq 0 ] || [ "${deb_files[0]}" = "$temp_dir/*.deb" ]; then
-              echo "No .deb files found in $temp_dir, skipping"
+            # Include debs
+            deb_files=("$artifact_dir"/*.deb)
+            if [ ${#deb_files[@]} -eq 0 ]; then
+              echo "No .deb files in $artifact_dir, skipping"
               continue
             fi
             
-            # Debug: List of deb files to include
-            echo "Debug: Deb files to include: ${deb_files[*]}"
-            
-            # Include debs (move --component BEFORE includedeb as global option)
-            echo "Debug: Including debs with command: reprepro -b repo/reprepro --component $component includedeb $CODENAME \"$temp_dir\"/*.deb"
-            reprepro -b repo/reprepro --component $component includedeb $CODENAME "$temp_dir"/*.deb
-            
-            rm -rf "$temp_dir"
+            reprepro -b repo/reprepro --component $component includedeb $CODENAME "$artifact_dir"/*.deb
           done
           
-          # Export the distribution to update Release files
-          echo "Debug: Exporting with reprepro -b repo/reprepro"
+          # Export the distribution
           reprepro -b repo/reprepro export $CODENAME
-          
-          # Debug: Final structure after processing
-          echo "Debug: Final structure of repo/reprepro:"
-          tree repo/reprepro || ls -laR repo/reprepro
-
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -245,4 +196,5 @@ jobs:
           publish_dir: ./repo
           publish_branch: apt
           keep_files: true
+          force_orphan: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"

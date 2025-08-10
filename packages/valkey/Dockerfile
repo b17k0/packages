@@ -48,20 +48,15 @@ RUN apt update && \
 WORKDIR /valkey-src
 
 # Download, extract, clean, and prepare sources
-RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}.tar.gz -o valkey.tar.gz && \
-    tar xzf valkey.tar.gz --strip-components=1 && \
-    rm valkey.tar.gz && \
-    make distclean
+RUN curl -L https://github.com/valkey-io/valkey/archive/refs/tags/${RELEASE_TAG}.tar.gz | tar xz --strip-components=1 && make distclean
 
 # Copy custom debian/ directory from the host repository (includes updated rules and *.install files)
 COPY packages/valkey/debian/ debian/
 
-# Export MAJOR for use in debian/rules
-ENV MAJOR=${MAJOR}
-
 # Build Debian packages using dpkg-buildpackage
+ENV MAJOR=${MAJOR}
 ENV DEB_BUILD_OPTIONS="parallel=$(nproc)"
-RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH} || true
+RUN dpkg-buildpackage -b -us -uc --host-arch ${ARCH}
 
 # Stage 2: Output (extract only .deb files for clean export)
 FROM scratch AS output

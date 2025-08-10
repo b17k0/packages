@@ -1,2 +1,0 @@
-/etc/valkey/valkey.conf
-/etc/logrotate.d/valkey-server
