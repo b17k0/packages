@@ -227,7 +227,7 @@ jobs:
           echo "Export completed for $CODENAME"
 
       - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v1
+        uses: jayanta525/github-pages-directory-listing@main
         with:
           folder: ./repo/reprepro
           template: |
@@ -247,6 +247,11 @@ jobs:
               </footer>
             </body>
             </html>
+
+      - name: Debug Generated Listings
+        run: |
+          echo "Checking generated index.html files:"
+          find ./repo/reprepro -name "index.html" -exec echo "Found: {}" \;
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
