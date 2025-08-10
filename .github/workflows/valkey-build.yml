@@ -260,6 +260,5 @@ jobs:
           publish_dir: ./repo/reprepro
           publish_branch: apt
           keep_files: true
-          force_orphan: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
 
