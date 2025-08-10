@@ -227,26 +227,9 @@ jobs:
           echo "Export completed for $CODENAME"
 
       - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@main
+        uses: gacts/directory-listing@v1.0.0
         with:
-          folder: ./repo/reprepro
-          template: |
-            <html>
-            <head><title>Valkey Directory Listing</title></head>
-            <body>
-              <h1>Valkey Releases</h1>
-              <ul>
-                <!-- Generated list items here -->
-              </ul>
-              <footer>
-                <p class="m-2 lg:m-4 text-sm">
-                  <a href="https://github.com/${{ github.repository }}" target="_blank">
-                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Repository" width="30" height="30">
-                  </a>
-                </p>
-              </footer>
-            </body>
-            </html>
+          path: ./repo/reprepro
 
       - name: Debug Generated Listings
         run: |
