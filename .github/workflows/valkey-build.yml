@@ -118,6 +118,10 @@ jobs:
     if: (github.event_name == 'schedule' && needs.check-release.outputs.new_release == 'true') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
+    env:
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -132,7 +136,29 @@ jobs:
       - name: Set up reprepro and tools
         run: |
           sudo apt update
-          sudo apt install -y reprepro gh jq
+          sudo apt install -y reprepro gh jq gnupg
+
+      - name: Import GPG key
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --yes --import
+          gpg --list-secret-keys --fingerprint
+
+      - name: Generate public.asc
+        run: |
+          PUBLIC_ASC="repo/reprepro/public.asc"
+          mkdir -p repo/reprepro  # Ensure directory exists
+          
+          if gpg --list-keys "$GPG_KEY_ID" > /dev/null 2>&1; then
+            if [ ! -f "$PUBLIC_ASC" ]; then
+              gpg --armor --export "$GPG_KEY_ID" > "$PUBLIC_ASC"
+              echo "Generated public.asc for key $GPG_KEY_ID"
+            else
+              echo "public.asc already exists, skipping generation"
+            fi
+          else
+            echo "Error: Key $GPG_KEY_ID not found!"
+            exit 1
+          fi
 
       - name: Download all packages artifacts
         uses: actions/download-artifact@v4
@@ -165,7 +191,7 @@ jobs:
             
             # Add or update section in distributions
             if ! grep -q "Codename: $CODENAME" "$DISTRIBUTIONS_FILE"; then
-              echo -e "\nCodename: $CODENAME\nComponents: $component\nArchitectures: $arch" >> "$DISTRIBUTIONS_FILE"
+              echo -e "\nOrigin: Valkey APT Repository\nLabel: Valkey\nSuite: stable\nCodename: $CODENAME\nComponents: $component\nArchitectures: $arch\nDescription: Valkey APT Repository\nSignWith: $GPG_KEY_ID" >> "$DISTRIBUTIONS_FILE"
             else
               CURRENT_COMPONENTS=$(sed -n "/Codename: $CODENAME/{n;p}" "$DISTRIBUTIONS_FILE" | grep "Components:" | cut -d' ' -f2- | tr -s ' ')
               if ! echo "$CURRENT_COMPONENTS" | grep -q "$component"; then
@@ -177,6 +203,11 @@ jobs:
               if ! echo "$CURRENT_ARCH" | grep -q "$arch"; then
                 NEW_ARCH="$CURRENT_ARCH $arch"
                 sed -i "/Codename: $CODENAME/{n;n;s/^Architectures: .*/Architectures: $NEW_ARCH/}" "$DISTRIBUTIONS_FILE"
+              fi
+              
+              # Ensure SignWith is present
+              if ! grep -q "SignWith:" "$DISTRIBUTIONS_FILE"; then
+                sed -i "/Codename: $CODENAME/a SignWith: $GPG_KEY_ID" "$DISTRIBUTIONS_FILE"
               fi
             fi
             
