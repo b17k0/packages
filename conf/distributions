@@ -2,7 +2,7 @@
 Origin: Valkey APT Repository
 Label: Valkey
 Suite: stable
-Codename: valkey7
+Codename: valkey8
 Components: bookworm noble
 Architectures: amd64
 Description: Valkey APT Repository
