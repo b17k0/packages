@@ -136,7 +136,7 @@ jobs:
       - name: Set up reprepro and tools
         run: |
           sudo apt update
-          sudo apt install -y reprepro gh jq gnupg
+          sudo apt install -y reprepro gh jq gnupg tree
 
       - name: Import GPG key
         run: |
@@ -145,8 +145,7 @@ jobs:
 
       - name: Generate public.asc
         run: |
-          PUBLIC_ASC="repo/reprepro/public.asc"
-          mkdir -p repo/reprepro  # Ensure directory exists
+          PUBLIC_ASC="repo/public.asc"
           
           if gpg --list-keys "$GPG_KEY_ID" > /dev/null 2>&1; then
             if [ ! -f "$PUBLIC_ASC" ]; then
@@ -169,12 +168,18 @@ jobs:
       - name: List downloaded artifacts
         run: ls -R ./downloaded-artifacts
 
+      - name: Debug Structure Before Processing
+        run: |
+          echo "Structure of ./repo before processing:"
+          tree ./repo || echo "Tree not available, listing with find:"
+          find ./repo -type d
+
       - name: Include packages dynamically
         run: |
           MAJOR="${{ needs.check-release.outputs.major_version }}"
           CODENAME="valkey$MAJOR"
-          mkdir -p repo/reprepro/conf
-          DISTRIBUTIONS_FILE="repo/reprepro/conf/distributions"
+          mkdir -p repo/conf
+          DISTRIBUTIONS_FILE="repo/conf/distributions"
           if [ ! -f "$DISTRIBUTIONS_FILE" ]; then
             touch "$DISTRIBUTIONS_FILE"
           fi
@@ -219,28 +224,36 @@ jobs:
             fi
             
             echo "Including ${#deb_files[@]} debs into $CODENAME/$component"
-            reprepro -b repo/reprepro --component $component includedeb $CODENAME "$artifact_dir"/*.deb
+            reprepro -b repo --component $component includedeb $CODENAME "$artifact_dir"/*.deb
           done
           
-          # Export the distribution
-          reprepro -b repo/reprepro export $CODENAME
-          echo "Export completed for $CODENAME"
+          # Export ALL codenames to update everything
+          CODENAMES=$(grep "Codename:" "$DISTRIBUTIONS_FILE" | cut -d' ' -f2 | tr '\n' ' ')
+          for cn in $CODENAMES; do
+            echo "Exporting $cn"
+            reprepro -b repo export $cn
+          done
+          echo "Export completed for all codenames"
 
       - name: Generate Directory Listings
         uses: gacts/directory-listing@v1.0.0
         with:
-          path: ./repo/reprepro
+          path: ./repo
+          overwrite: true
 
       - name: Debug Generated Listings
         run: |
+          echo "Structure of ./repo after generation:"
+          tree ./repo || echo "Tree not available, listing with find:"
+          find ./repo -type d
           echo "Checking generated index.html files:"
-          find ./repo/reprepro -name "index.html" -exec echo "Found: {}" \;
+          find ./repo -name "index.html" -exec echo "Found: {}" \;
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./repo/reprepro
+          publish_dir: ./repo
           publish_branch: apt
           keep_files: true
           commit_message: "Update APT repo for Valkey ${{ needs.check-release.outputs.release_tag }}"
